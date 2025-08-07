@@ -1,0 +1,137 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  email     String   @unique
+  firstName String
+  lastName  String
+  imageUrl  String?
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  eventsCreated Event[]        @relation("EventCreator")
+  registrations Registration[]
+  feedback      Feedback[]
+  notifications Notification[]
+
+  @@map("users")
+}
+
+model Event {
+  id          String      @id @default(cuid())
+  title       String
+  description String
+  imageUrl    String?
+  location    String
+  startDate   DateTime
+  endDate     DateTime
+  capacity    Int
+  price       Float?      @default(0)
+  category    Category    @default(ACADEMIC)
+  status      EventStatus @default(DRAFT)
+  createdById String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  createdBy     User           @relation("EventCreator", fields: [createdById], references: [id])
+  registrations Registration[]
+  feedback      Feedback[]
+  notifications Notification[]
+
+  @@map("events")
+}
+
+model Registration {
+  id           String             @id @default(cuid())
+  userId       String
+  eventId      String
+  status       RegistrationStatus @default(REGISTERED)
+  registeredAt DateTime           @default(now())
+
+  // Relations
+  user  User  @relation(fields: [userId], references: [id])
+  event Event @relation(fields: [eventId], references: [id])
+
+  @@unique([userId, eventId])
+  @@map("registrations")
+}
+
+model Feedback {
+  id        String   @id @default(cuid())
+  userId    String
+  eventId   String
+  rating    Int // 1-5 stars
+  comment   String?
+  createdAt DateTime @default(now())
+
+  // Relations
+  user  User  @relation(fields: [userId], references: [id])
+  event Event @relation(fields: [eventId], references: [id])
+
+  @@unique([userId, eventId])
+  @@map("feedback")
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  eventId   String?
+  title     String
+  message   String
+  type      NotificationType
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  // Relations
+  user  User   @relation(fields: [userId], references: [id])
+  event Event? @relation(fields: [eventId], references: [id])
+
+  @@map("notifications")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Category {
+  ACADEMIC
+  CULTURAL
+  SPORTS
+  TECHNICAL
+  SOCIAL
+  WORKSHOP
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  CANCELLED
+  COMPLETED
+}
+
+enum RegistrationStatus {
+  REGISTERED
+  ATTENDED
+  CANCELLED
+}
+
+enum NotificationType {
+  EVENT_CREATED
+  EVENT_UPDATED
+  EVENT_CANCELLED
+  REGISTRATION_CONFIRMED
+  FEEDBACK_REQUEST
+}
