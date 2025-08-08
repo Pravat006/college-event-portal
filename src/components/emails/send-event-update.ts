@@ -1,18 +1,18 @@
 import { EventEmail } from "@/types/event"
-import { format } from "date-fns/"
+import { format } from "date-fns"
 
 function generateEventUpdateHTML({ event, user, updateType }: EventEmail & { updateType: 'updated' | 'cancelled' }) {
-    const startDate = format(new Date(event.startDate), 'EEEE, MMMM do, yyyy')
-    const startTime = format(new Date(event.startDate), 'h:mm a')
-    const endTime = format(new Date(event.endDate), 'h:mm a')
+  const startDate = format(new Date(event.startDate), 'EEEE, MMMM do, yyyy')
+  const startTime = format(new Date(event.startDate), 'h:mm a')
+  const endTime = format(new Date(event.endDate), 'h:mm a')
 
-    const isUpdate = updateType === 'updated'
-    const bgColor = isUpdate ? '#fef3c7' : '#fee2e2'
-    const borderColor = isUpdate ? '#fcd34d' : '#fca5a5'
-    const textColor = isUpdate ? '#92400e' : '#dc2626'
-    const icon = isUpdate ? '⚠️' : '❌'
+  const isUpdate = updateType === 'updated'
+  const bgColor = isUpdate ? '#fef3c7' : '#fee2e2'
+  const borderColor = isUpdate ? '#fcd34d' : '#fca5a5'
+  const textColor = isUpdate ? '#92400e' : '#dc2626'
+  const icon = isUpdate ? '⚠️' : '❌'
 
-    return `
+  return `
     <!DOCTYPE html>
     <html lang="en">
     <head>
@@ -62,9 +62,9 @@ function generateEventUpdateHTML({ event, user, updateType }: EventEmail & { upd
           <h1 class="alert-title">Event ${updateType === 'updated' ? 'Updated' : 'Cancelled'}</h1>
           <p class="alert-message">
             ${updateType === 'updated'
-            ? 'Important changes have been made to your registered event'
-            : 'Unfortunately, this event has been cancelled'
-        }
+      ? 'Important changes have been made to your registered event'
+      : 'Unfortunately, this event has been cancelled'
+    }
           </p>
         </div>
 
@@ -72,9 +72,9 @@ function generateEventUpdateHTML({ event, user, updateType }: EventEmail & { upd
         
         <p>
           ${updateType === 'updated'
-            ? `We wanted to let you know that <strong>${event.title}</strong> has been updated. Please review the current event details below.`
-            : `We regret to inform you that <strong>${event.title}</strong> has been cancelled. We apologize for any inconvenience this may cause.`
-        }
+      ? `We wanted to let you know that <strong>${event.title}</strong> has been updated. Please review the current event details below.`
+      : `We regret to inform you that <strong>${event.title}</strong> has been cancelled. We apologize for any inconvenience this may cause.`
+    }
         </p>
 
         ${updateType === 'updated' ? `

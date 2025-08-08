@@ -7,17 +7,18 @@ import { Calendar, MapPin, Users, Star } from 'lucide-react'
 import { format } from 'date-fns'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
+import Image from 'next/image'
 
 interface Event {
     id: string
     title: string
     description: string
-    imageUrl?: string
+    imageUrl: string | null
     location: string
     startDate: Date
     endDate: Date
     capacity: number
-    price: number
+    price: number | null
     category: string
     status: string
     createdBy: { firstName: string; lastName: string }
@@ -49,7 +50,7 @@ export default function EventsGrid({ events, user }: EventsGridProps) {
                 const error = await response.json()
                 toast.error(error.message || 'Registration failed')
             }
-        } catch (error) {
+        } catch {
             toast.error('Something went wrong')
         } finally {
             setRegistering(null)
@@ -87,13 +88,15 @@ export default function EventsGrid({ events, user }: EventsGridProps) {
     return (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {events.map((event) => (
-                <Card key={event.id} className="hover:shadow-lg transition-shadow">
+                <Card key={event.id} className="hover:shadow-lg transition-shadow pt-0">
                     {event.imageUrl && (
-                        <div className="aspect-video bg-gray-100 rounded-t-lg">
-                            <img
+                        <div className="aspect-video bg-gray-100 rounded-t-lg overflow-hidden">
+                            <Image
                                 src={event.imageUrl}
                                 alt={event.title}
-                                className="w-full h-full object-cover rounded-t-lg"
+                                width={400}
+                                height={200}
+                                className="w-full h-full object-cover object-center"
                             />
                         </div>
                     )}
@@ -132,7 +135,7 @@ export default function EventsGrid({ events, user }: EventsGridProps) {
                             )}
                         </div>
 
-                        {event.price > 0 && (
+                        {event.price && event.price > 0 && (
                             <div className="text-lg font-semibold text-green-600">
                                 ${event.price}
                             </div>
