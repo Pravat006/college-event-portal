@@ -4,14 +4,15 @@ import { prisma } from '@/lib/prisma'
 
 export async function POST(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const user = await requireAuth()
+        const { id } = await params
 
         await prisma.notification.updateMany({
             where: {
-                id: params.id,
+                id: id,
                 userId: user.id
             },
             data: { read: true }

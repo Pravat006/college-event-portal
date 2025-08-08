@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
                     location: event.location,
                     startDate: event.startDate,
                     endDate: event.endDate,
-                    price: event.price || 0,
+                    price: event.price ?? 0, // Provide default value of 0 if price is null
                     category: event.category
                 },
                 user: {
