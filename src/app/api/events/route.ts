@@ -81,7 +81,7 @@ export async function PUT(req: NextRequest) {
                     location: event.location,
                     startDate: event.startDate,
                     endDate: event.endDate,
-                    price: event.price,
+                    price: event.price ?? 0,
                     category: event.category
                 },
                 user: registration.user,
@@ -141,7 +141,7 @@ export async function DELETE(req: NextRequest) {
                     location: event.location,
                     startDate: event.startDate,
                     endDate: event.endDate,
-                    price: event.price,
+                    price: event.price ?? 0,
                     category: event.category
                 },
                 user: registration.user,

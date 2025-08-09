@@ -100,3 +100,121 @@ export async function POST(req: NextRequest) {
         )
     }
 }
+
+// get all the registered events by user
+
+export async function GET() {
+    try {
+        const user = await requireAuth()
+
+        const registrations = await prisma.registration.findMany({
+            where: {
+                userId: user.id
+            },
+            include: {
+                event: {
+                    select: {
+                        id: true,
+                        title: true,
+                        startDate: true,
+                        endDate: true,
+                        location: true,
+                        status: true
+                    }
+                }
+            }
+        })
+
+        return NextResponse.json(registrations)
+    } catch (error) {
+        console.error('Error fetching registered events:', error)
+        return NextResponse.json(
+            { message: 'Failed to fetch registered events' },
+            { status: 500 }
+        )
+    }
+}
+
+
+// cancel a event registartion by user
+export async function DELETE(req: NextRequest) {
+    try {
+        const user = await requireAuth()
+        const { eventId } = await req.json()
+
+        // Check if registration exists
+        const existingRegistration = await prisma.registration.findUnique({
+            where: {
+                userId_eventId: {
+                    userId: user.id,
+                    eventId
+                }
+            },
+            include: {
+                event: {
+                    select: {
+                        title: true,
+                        startDate: true
+                    }
+                }
+            }
+        })
+
+        if (!existingRegistration) {
+            return NextResponse.json(
+                { message: 'Registration not found' },
+                { status: 404 }
+            )
+        }
+
+        const now = new Date()
+        if (existingRegistration.event.startDate <= now) {
+            return NextResponse.json(
+                { message: 'Cannot cancel registration for events that have already started' },
+                { status: 400 }
+            )
+        }
+
+        // Delete the registration
+        await prisma.registration.delete({
+            where: {
+                userId_eventId: {
+                    userId: user.id,
+                    eventId
+                }
+            }
+        })
+
+        // Create notification
+        await prisma.notification.create({
+            data: {
+                userId: user.id,
+                eventId,
+                title: 'Registration Cancelled',
+                message: `You have cancelled your registration for ${existingRegistration.event.title}`,
+                type: 'REGISTRATION_CANCELLED'
+            }
+        })
+
+        return NextResponse.json({
+            message: 'Registration cancelled successfully'
+        })
+    } catch (error) {
+        console.error('Error cancelling registration:', error)
+        return NextResponse.json(
+            { message: 'Failed to cancel registration' },
+            { status: 500 }
+        )
+    }
+}
+
+
+
+
+
+
+
+
+
+
+

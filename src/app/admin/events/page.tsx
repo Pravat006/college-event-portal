@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import Navbar from "@/components/navbar";
 import Sidebar from "@/components/sidebar";
+import DeleteEventButton from "@/components/delete-event-button";
 
 export default async function AdminEventsPage() {
     try {
@@ -22,6 +23,19 @@ export default async function AdminEventsPage() {
                 createdAt: 'desc'
             }
         });
+
+        const handleDeleteEvent = async (eventId: string) => {
+
+            try {
+                await prisma.event.delete({
+                    where: { id: eventId }
+                });
+                // Optionally, you can re-fetch events or update the state to reflect the deletion
+                redirect("/admin/events");
+            } catch (error) {
+                console.error("Error deleting event:", error);
+            }
+        }
 
         return (
             <div className="min-h-screen bg-gray-50">
@@ -79,9 +93,10 @@ export default async function AdminEventsPage() {
                                                     <a href={`/admin/events/${event.id}`} className="text-blue-600 hover:text-blue-900 mr-3">
                                                         Edit
                                                     </a>
-                                                    <button className="text-red-600 hover:text-red-900">
-                                                        Delete
-                                                    </button>
+                                                    <DeleteEventButton
+                                                        eventId={event.id}
+                                                        eventTitle={event.title}
+                                                    />
                                                 </td>
                                             </tr>
                                         ))}

@@ -11,7 +11,7 @@ export default async function DashboardPage() {
         return null
     }
 
-    // Get dashboard data
+
     const [totalEvents, totalRegistrations, upcomingEvents, recentEvents] = await Promise.all([
         user.role === 'ADMIN'
             ? prisma.event.count()
