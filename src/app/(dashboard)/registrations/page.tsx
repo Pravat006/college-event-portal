@@ -48,14 +48,6 @@ export default function RegistrationsPage() {
 
     // Simplified handler - only updates UI state
     const handleCancelRegistration = async (eventId: string) => {
-
-        // setRegistrations(prev =>
-        //     prev.map(reg =>
-        //         reg.event.id === eventId
-        //             ? { ...reg, status: 'CANCELLED' }
-        //             : reg
-        //     )
-        // )
         try {
             await fetch('/api/events/register', {
                 method: 'DELETE',
