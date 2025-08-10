@@ -47,13 +47,7 @@ export async function POST(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
     try {
-        const user = await requireAdmin()
-        if (!user) {
-            return NextResponse.json(
-                { message: 'Unauthorized' },
-                { status: 401 }
-            )
-        }
+        await requireAdmin()
         const { id, ...data } = await req.json()
 
         const event = await prisma.event.update({
@@ -103,7 +97,7 @@ export async function PUT(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
     try {
-        const user = await requireAdmin()
+        await requireAdmin()
         const { searchParams } = new URL(req.url)
         const id = searchParams.get('id')
 

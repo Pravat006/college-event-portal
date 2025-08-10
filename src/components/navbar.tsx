@@ -1,18 +1,17 @@
-'use client'
+"use client";
 
-import { UserButton } from '@clerk/nextjs'
-import { Bell, Calendar } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import NotificationDropdown from '@/components/notification-dropdown'
-import Link from 'next/link'
+import { UserButton } from "@clerk/nextjs";
+import { Calendar } from "lucide-react";
+import NotificationDropdown from "@/components/notification-dropdown";
+import Link from "next/link";
 
 interface NavbarProps {
     user?: {
-        firstName: string
-        lastName: string
-        role: string
-        imageUrl?: string | null
-    } | null
+        firstName: string;
+        lastName: string;
+        role: string;
+        imageUrl?: string | null;
+    } | null;
 }
 
 export default function Navbar({ user }: NavbarProps) {
@@ -52,10 +51,16 @@ export default function Navbar({ user }: NavbarProps) {
                             </div>
                         ) : (
                             <div className="flex items-center space-x-4">
-                                <Link href="/sign-in" className="text-sm font-medium text-gray-900 hover:text-gray-700">
+                                <Link
+                                    href="/sign-in"
+                                    className="text-sm font-medium text-gray-900 hover:text-gray-700"
+                                >
                                     Sign In
                                 </Link>
-                                <Link href="/sign-up" className="px-4 py-2 bg-black text-white rounded font-semibold hover:bg-gray-800 transition-colors">
+                                <Link
+                                    href="/sign-up"
+                                    className="px-4 py-2 bg-black text-white rounded font-semibold hover:bg-gray-800 transition-colors"
+                                >
                                     Get Started
                                 </Link>
                             </div>
@@ -64,5 +69,5 @@ export default function Navbar({ user }: NavbarProps) {
                 </div>
             </div>
         </nav>
-    )
+    );
 }

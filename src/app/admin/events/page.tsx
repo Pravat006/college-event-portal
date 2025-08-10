@@ -7,35 +7,14 @@ import DeleteEventButton from "@/components/delete-event-button";
 
 export default async function AdminEventsPage() {
     try {
-        // This ensures only admins can access this page
         const user = await requireAdmin();
 
-        // Get all events with registration count
         const events = await prisma.event.findMany({
             include: {
-                _count: {
-                    select: {
-                        registrations: true
-                    }
-                }
+                _count: { select: { registrations: true } }
             },
-            orderBy: {
-                createdAt: 'desc'
-            }
+            orderBy: { createdAt: 'desc' }
         });
-
-        const handleDeleteEvent = async (eventId: string) => {
-
-            try {
-                await prisma.event.delete({
-                    where: { id: eventId }
-                });
-                // Optionally, you can re-fetch events or update the state to reflect the deletion
-                redirect("/admin/events");
-            } catch (error) {
-                console.error("Error deleting event:", error);
-            }
-        }
 
         return (
             <div className="min-h-screen bg-gray-50">
@@ -55,54 +34,30 @@ export default async function AdminEventsPage() {
                                 <table className="min-w-full divide-y divide-gray-200">
                                     <thead className="bg-gray-50">
                                         <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Event Name
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Date
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Registrations
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Status
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Actions
-                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event Name</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Registrations</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className="bg-white divide-y divide-gray-200">
-                                        {events.map((event) => (
+                                        {events.map(event => (
                                             <tr key={event.id}>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                    {event.title}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                    {new Date(event.startDate).toLocaleDateString()}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                    {event._count.registrations}
-                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{event.title}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(event.startDate).toLocaleDateString()}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{event._count.registrations}</td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                                        Active
-                                                    </span>
+                                                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                    <a href={`/admin/events/${event.id}`} className="text-blue-600 hover:text-blue-900 mr-3">
-                                                        Edit
-                                                    </a>
-                                                    <DeleteEventButton
-                                                        eventId={event.id}
-                                                        eventTitle={event.title}
-                                                    />
+                                                    <a href={`/admin/events/${event.id}`} className="text-blue-600 hover:text-blue-900 mr-3">Edit</a>
+                                                    <DeleteEventButton eventId={event.id} eventTitle={event.title} />
                                                 </td>
                                             </tr>
                                         ))}
                                     </tbody>
                                 </table>
-
                                 {events.length === 0 && (
                                     <div className="text-center py-12">
                                         <p className="text-gray-500">No events found. Create your first event to get started.</p>
@@ -115,7 +70,6 @@ export default async function AdminEventsPage() {
             </div>
         );
     } catch {
-        // If user is not an admin, redirect to home
         redirect("/");
     }
 }

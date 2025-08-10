@@ -14,10 +14,9 @@ interface Event {
 
 interface RecentEventsProps {
     events: Event[]
-    userRole: string
 }
 
-export default function RecentEvents({ events, userRole }: RecentEventsProps) {
+export default function RecentEvents({ events }: RecentEventsProps) {
     const getCategoryColor = (category: string) => {
         const colors = {
             'ACADEMIC': 'bg-blue-100 text-blue-800',
@@ -33,9 +32,7 @@ export default function RecentEvents({ events, userRole }: RecentEventsProps) {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>
-                    {userRole === 'ADMIN' ? 'Recent Events' : 'My Recent Events'}
-                </CardTitle>
+                <CardTitle>Recent Events</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
                 {events.length === 0 ? (

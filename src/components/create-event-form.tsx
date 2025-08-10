@@ -48,10 +48,10 @@ export default function CreateEventForm() {
                 toast.success('Event created successfully!')
                 router.push('/events')
             } else {
-                const error = await response.json()
-                toast.error(error.message || 'Failed to create event')
+                const errJson = await response.json()
+                toast.error(errJson.message || 'Failed to create event')
             }
-        } catch (error) {
+        } catch {
             toast.error('Something went wrong')
         } finally {
             setLoading(false)

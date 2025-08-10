@@ -73,8 +73,8 @@ export default async function DashboardPage() {
             />
 
             <div className="grid lg:grid-cols-2 gap-8">
-                <UpcomingEvents events={upcomingEvents} userRole={user.role} />
-                <RecentEvents events={recentEvents} userRole={user.role} />
+                <UpcomingEvents events={upcomingEvents} />
+                <RecentEvents events={recentEvents} />
             </div>
         </div>
     )

@@ -52,10 +52,10 @@ export default function EventRegistrationButton({
                 toast.success('Successfully registered! Check your email for confirmation.')
                 window.location.reload()
             } else {
-                const error = await response.json()
-                toast.error(error.message || 'Registration failed')
+                const errJson = await response.json()
+                toast.error(errJson.message || 'Registration failed')
             }
-        } catch (error) {
+        } catch {
             toast.error('Something went wrong')
         } finally {
             setRegistering(false)

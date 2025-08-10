@@ -14,10 +14,9 @@ interface Event {
 
 interface UpcomingEventsProps {
     events: Event[]
-    userRole: string
 }
 
-export default function UpcomingEvents({ events, userRole }: UpcomingEventsProps) {
+export default function UpcomingEvents({ events }: UpcomingEventsProps) {
     const getCategoryColor = (category: string) => {
         const colors = {
             'ACADEMIC': 'bg-blue-100 text-blue-800',

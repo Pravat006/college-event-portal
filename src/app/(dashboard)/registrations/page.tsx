@@ -46,29 +46,15 @@ export default function RegistrationsPage() {
         }
     }
 
-    // Simplified handler - only updates UI state
-    const handleCancelRegistration = async (eventId: string) => {
-        try {
-            await fetch('/api/events/register', {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ eventId }),
-            })
-            setRegistrations(prev =>
-                prev.map(reg =>
-                    reg.event.id === eventId
-                        ? { ...reg, status: 'CANCELLED' }
-                        : reg
-                )
+    // UI state updater (API call handled inside UnregisterEventButton)
+    const handleCancelRegistration = (eventId: string) => {
+        setRegistrations(prev =>
+            prev.map(reg =>
+                reg.event.id === eventId
+                    ? { ...reg, status: 'CANCELLED' }
+                    : reg
             )
-            toast.success('Registration cancelled successfully')
-
-        } catch (error) {
-            console.error('Error cancelling registration:', error)
-            toast.error('Failed to cancel registration')
-        }
+        )
     }
 
     const formatDate = (dateString: string) => {
@@ -78,10 +64,6 @@ export default function RegistrationsPage() {
             month: 'short',
             day: 'numeric',
         })
-    }
-
-    const isEventStarted = (startDate: string) => {
-        return new Date(startDate) <= new Date()
     }
 
     const getStatusColor = (status: string) => {
@@ -190,17 +172,11 @@ export default function RegistrationsPage() {
                                         <MapPin className="h-4 w-4 text-gray-500" />
                                         <span>{registration.event.location}</span>
                                     </div>
-                                    {
-                                        // !isEventStarted(registration.event.startDate) && (
-                                        <UnregisterEventButton
-                                            eventId={registration.event.id}
-                                            eventTitle={registration.event.title}
-                                            onCancel={handleCancelRegistration}
-
-                                        />
-                                        // )
-
-                                    }
+                                    <UnregisterEventButton
+                                        eventId={registration.event.id}
+                                        eventTitle={registration.event.title}
+                                        onCancel={handleCancelRegistration}
+                                    />
                                 </div>
                             </CardContent>
                         </Card>
