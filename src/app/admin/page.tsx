@@ -6,12 +6,9 @@ import Sidebar from "@/components/sidebar";
 // import DashboardStats from "@/components/dashboard-stats";
 
 export default async function AdminPage() {
-    console.log('🚨 ADMIN PAGE: Starting admin page render...')
     try {
         // This ensures only admins can access this page
-        console.log('🚨 ADMIN PAGE: Calling requireAdmin()...')
         const user = await requireAdmin();
-        console.log('🚨 ADMIN PAGE: requireAdmin() succeeded for:', user.email)
 
         // Get admin dashboard data
         const [totalEvents, totalRegistrations, feedbackCount] = await Promise.all([

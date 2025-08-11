@@ -26,8 +26,8 @@ export default async function DashboardLayout({
             <Navbar user={user} />
             <div className="flex">
                 <Sidebar user={user} />
-                <main className="flex-1 ml-64 pt-16">
-                    <div className="p-8">
+                <main className="flex-1 lg:ml-64 pt-16 w-full">
+                    <div className="p-3 sm:p-4 md:p-6 lg:p-8">
                         {children}
                     </div>
                 </main>

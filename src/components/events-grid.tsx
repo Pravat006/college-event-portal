@@ -86,7 +86,7 @@ export default function EventsGrid({ events, user }: EventsGridProps) {
     }
 
     return (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {events.map((event) => (
                 <Card key={event.id} className="hover:shadow-lg transition-shadow pt-0">
                     {event.imageUrl && (

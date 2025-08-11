@@ -29,42 +29,41 @@ export default async function AdminUsersPage() {
                 createdAt: 'desc'
             }
         });
-        console.log('AdminUsersPage: Fetched users:', users);
 
         return (
             <div className="min-h-screen bg-gray-50">
                 <Navbar user={user} />
                 <div className="flex">
                     <Sidebar user={user} />
-                    <main className="flex-1 ml-64 pt-16">
-                        <div className="p-8">
-                            <div className="flex justify-between items-center mb-6">
-                                <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
+                    <main className="flex-1 lg:ml-64 pt-16">
+                        <div className="p-4 sm:p-6 md:p-8">
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-6">
+                                <h1 className="text-xl sm:text-2xl font-bold text-gray-900">User Management</h1>
                                 <div className="text-sm text-gray-500">
                                     Total Users: {users.length}
                                 </div>
                             </div>
 
-                            <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+                            <div className="bg-white rounded-lg shadow-sm overflow-x-auto">
                                 <table className="min-w-full divide-y divide-gray-200">
                                     <thead className="bg-gray-50">
                                         <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                 User
                                             </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                 Email
                                             </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                 Role
                                             </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                 Registrations
                                             </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                 Joined
                                             </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                 Actions
                                             </th>
                                         </tr>
@@ -72,36 +71,36 @@ export default async function AdminUsersPage() {
                                     <tbody className="bg-white divide-y divide-gray-200">
                                         {users.map((userData) => (
                                             <tr key={userData.id}>
-                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                                                     <div className="flex items-center">
-                                                        <div className="flex-shrink-0 h-10 w-10">
+                                                        <div className="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10">
                                                             {userData.imageUrl ? (
                                                                 <Image
-                                                                    className="h-10 w-10 rounded-full"
+                                                                    className="h-8 w-8 sm:h-10 sm:w-10 rounded-full"
                                                                     src={userData.imageUrl}
                                                                     alt="image"
                                                                     width={40}
                                                                     height={40}
                                                                 />
                                                             ) : (
-                                                                <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
-                                                                    <span className="text-sm font-medium text-gray-700">
+                                                                <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-gray-300 flex items-center justify-center">
+                                                                    <span className="text-xs sm:text-sm font-medium text-gray-700">
                                                                         {userData.firstName?.charAt(0) || userData.email?.charAt(0) || '?'}
                                                                     </span>
                                                                 </div>
                                                             )}
                                                         </div>
-                                                        <div className="ml-4">
-                                                            <div className="text-sm font-medium text-gray-900">
+                                                        <div className="ml-3 sm:ml-4">
+                                                            <div className="text-xs sm:text-sm font-medium text-gray-900">
                                                                 {userData.firstName} {userData.lastName}
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
                                                     {userData.email}
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                                                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${userData.role === 'ADMIN'
                                                         ? 'bg-purple-100 text-purple-800'
                                                         : 'bg-green-100 text-green-800'
@@ -109,16 +108,16 @@ export default async function AdminUsersPage() {
                                                         {userData.role}
                                                     </span>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
                                                     {userData._count.registrations}
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
                                                     {new Date(userData.createdAt).toLocaleDateString()}
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm font-medium">
                                                     <select
                                                         defaultValue={userData.role}
-                                                        className="border border-gray-300 rounded px-2 py-1 text-sm">
+                                                        className="border border-gray-300 rounded px-2 py-1 text-xs sm:text-sm">
                                                         <option value="USER">User</option>
                                                         <option value="ADMIN">Admin</option>
                                                     </select>

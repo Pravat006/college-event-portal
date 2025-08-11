@@ -13,9 +13,6 @@ export default function Error({
     const router = useRouter();
 
     useEffect(() => {
-        // Log the error to an error reporting service
-        console.error('Auth redirect error:', error);
-
         // Redirect to home page after a short delay
         const timer = setTimeout(() => {
             router.push('/');

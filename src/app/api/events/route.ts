@@ -36,8 +36,7 @@ export async function POST(req: NextRequest) {
         }
 
         return NextResponse.json(event)
-    } catch (error) {
-        console.error('Error creating event:', error)
+    } catch {
         return NextResponse.json(
             { message: 'Failed to create event' },
             { status: 500 }
@@ -80,14 +79,13 @@ export async function PUT(req: NextRequest) {
                 },
                 user: registration.user,
                 updateType: 'updated'
-            }).catch(error => console.error('Failed to send update email:', error))
+            }).catch(() => null) // Silently catch errors
         )
 
         await Promise.all(emailPromises)
 
         return NextResponse.json(event)
-    } catch (error) {
-        console.error('Error updating event:', error)
+    } catch {
         return NextResponse.json(
             { message: 'Failed to update event' },
             { status: 500 }
@@ -140,7 +138,7 @@ export async function DELETE(req: NextRequest) {
                 },
                 user: registration.user,
                 updateType: 'cancelled'
-            }).catch(error => console.error('Failed to send cancellation email:', error))
+            }).catch(() => null) // Silently catch errors
         )
 
         await Promise.all(emailPromises)
@@ -152,8 +150,7 @@ export async function DELETE(req: NextRequest) {
         })
 
         return NextResponse.json({ message: 'Event cancelled successfully' })
-    } catch (error) {
-        console.error('Error cancelling event:', error)
+    } catch {
         return NextResponse.json(
             { message: 'Failed to cancel event' },
             { status: 500 }

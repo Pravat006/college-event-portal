@@ -15,12 +15,10 @@ export async function sendEventConfirmationEmail({ event, user }: EventEmail) {
             html: eventEmailHTML({ event, user })
         })
         if (error) {
-            console.error("Error sending email:", error)
             return { success: false, error }
         }
         return { success: true, data }
     } catch (error) {
-        console.error("Error sending email:", error)
         return { success: false, error }
     }
 }
@@ -39,13 +37,11 @@ export async function sendEventUpdateEmail({ event, user, updateType }: EventEma
         })
 
         if (error) {
-            console.error('Error sending update email:', error)
             return { success: false, error }
         }
 
         return { success: true, data }
     } catch (error) {
-        console.error('Error sending update email:', error)
         return { success: false, error }
     }
 

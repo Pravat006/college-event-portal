@@ -35,8 +35,8 @@ export default function NotificationDropdown() {
                 setNotifications(data)
                 setUnreadCount(data.filter((n: Notification) => !n.read).length)
             }
-        } catch (error) {
-            console.error('Failed to fetch notifications:', error)
+        } catch {
+            // Failed to fetch notifications
         }
     }
 
@@ -47,15 +47,15 @@ export default function NotificationDropdown() {
                 prev.map(n => n.id === id ? { ...n, read: true } : n)
             )
             setUnreadCount(prev => Math.max(0, prev - 1))
-        } catch (error) {
-            console.error('Failed to mark notification as read:', error)
+        } catch {
+            // Failed to mark notification as read
         }
     }
 
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="relative">
+                <Button variant="ghost" size="sm" className="relative p-1 sm:p-2">
                     <Bell className="h-5 w-5" />
                     {unreadCount > 0 && (
                         <Badge
@@ -67,7 +67,13 @@ export default function NotificationDropdown() {
                     )}
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80">
+            <DropdownMenuContent align="end" className="w-[280px] sm:w-80">{unreadCount > 0 && (
+                <div className="px-4 py-2 border-b border-gray-100">
+                    <p className="text-xs font-medium text-gray-500">
+                        {unreadCount} unread {unreadCount === 1 ? 'notification' : 'notifications'}
+                    </p>
+                </div>
+            )}
                 {notifications.length === 0 ? (
                     <div className="p-4 text-center text-gray-500">
                         No notifications

@@ -38,8 +38,7 @@ export default function RegistrationsPage() {
             }
             const data = await response.json()
             setRegistrations(data)
-        } catch (error) {
-            console.error('Error fetching registrations:', error)
+        } catch {
             toast.error('Failed to load registrations')
         } finally {
             setLoading(false)
@@ -118,17 +117,17 @@ export default function RegistrationsPage() {
     }
 
     return (
-        <div className="container mx-auto p-6">
-            <h1 className="text-3xl font-bold mb-6">My Registrations</h1>
+        <div>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-4 sm:mb-6">My Registrations</h1>
 
             {registrations.length === 0 ? (
                 <Card>
-                    <CardContent className="text-center py-12">
-                        <Calendar className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    <CardContent className="text-center py-8 sm:py-12">
+                        <Calendar className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-gray-400 mb-3 sm:mb-4" />
+                        <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">
                             No registrations found
                         </h3>
-                        <p className="text-gray-500 mb-4">
+                        <p className="text-sm text-gray-500 mb-4">
                             You haven&apos;t registered for any events yet.
                         </p>
                         <Button asChild>
@@ -137,13 +136,13 @@ export default function RegistrationsPage() {
                     </CardContent>
                 </Card>
             ) : (
-                <div className="grid gap-6">
+                <div className="grid gap-4 sm:gap-6">
                     {registrations.map((registration) => (
                         <Card key={registration.id} className="overflow-hidden">
-                            <CardHeader>
-                                <div className="flex justify-between items-start">
+                            <CardHeader className="px-4 py-4 sm:px-6 sm:py-6">
+                                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
                                     <div>
-                                        <CardTitle className="text-xl mb-2">
+                                        <CardTitle className="text-base sm:text-xl mb-2">
                                             {registration.event.title}
                                         </CardTitle>
                                         <div className="flex gap-2 flex-wrap">
@@ -157,26 +156,28 @@ export default function RegistrationsPage() {
                                     </div>
                                 </div>
                             </CardHeader>
-                            <CardContent>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                            <CardContent className="px-4 py-4 sm:px-6 sm:py-6">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 text-sm">
                                     <div className="flex items-center gap-2">
-                                        <Calendar className="h-4 w-4 text-gray-500" />
+                                        <Calendar className="h-4 w-4 text-gray-500 flex-shrink-0" />
                                         <div>
-                                            <p className="font-medium">
+                                            <p className="font-medium truncate">
                                                 {formatDate(registration.event.startDate)}
                                             </p>
                                         </div>
                                     </div>
 
                                     <div className="flex items-center gap-2">
-                                        <MapPin className="h-4 w-4 text-gray-500" />
-                                        <span>{registration.event.location}</span>
+                                        <MapPin className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                                        <span className="truncate">{registration.event.location}</span>
                                     </div>
-                                    <UnregisterEventButton
-                                        eventId={registration.event.id}
-                                        eventTitle={registration.event.title}
-                                        onCancel={handleCancelRegistration}
-                                    />
+                                    <div className="mt-2 sm:mt-0">
+                                        <UnregisterEventButton
+                                            eventId={registration.event.id}
+                                            eventTitle={registration.event.title}
+                                            onCancel={handleCancelRegistration}
+                                        />
+                                    </div>
                                 </div>
                             </CardContent>
                         </Card>

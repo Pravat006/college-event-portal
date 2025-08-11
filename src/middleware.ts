@@ -10,17 +10,14 @@ export default clerkMiddleware(async (auth, req) => {
     // For admin routes, do additional checks
     if (isAdminRoute(req)) {
         if (!userId) {
-            console.log('Middleware: Admin route accessed without authentication, redirecting to sign-in')
             return NextResponse.redirect(new URL('/sign-in', req.url))
         }
 
         // Let the admin layout handle the role checking
-        console.log('Middleware: Admin route accessed by authenticated user, proceeding to layout check')
     }
 
     // For non-public routes, require authentication
     if (!isPublicRoute(req) && !userId) {
-        console.log('Middleware: Protected route accessed without authentication, redirecting to sign-in')
         return NextResponse.redirect(new URL('/sign-in', req.url))
     }
 })

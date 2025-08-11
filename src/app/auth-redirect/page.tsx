@@ -16,7 +16,6 @@ export default function AuthRedirectPage() {
 
             // If no user is logged in, redirect to sign-in
             if (!userId || !user) {
-                console.log('No userId found, redirecting to sign-in');
                 router.push('/sign-in');
                 return;
             }
@@ -43,14 +42,11 @@ export default function AuthRedirectPage() {
 
                 // Redirect based on role
                 if (data.role === 'ADMIN') {
-                    console.log('Redirecting to admin dashboard');
                     router.push('/admin');
                 } else {
-                    console.log('Redirecting to user ');
                     router.push('/');
                 }
-            } catch (err) {
-                console.error('Error in auth redirect:', err);
+            } catch {
                 setError('An error occurred during authentication. Redirecting to home page...');
 
                 // Redirect to home page after a short delay

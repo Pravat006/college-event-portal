@@ -36,35 +36,35 @@ export default async function AdminRegistrationsPage() {
                 <Navbar user={user} />
                 <div className="flex">
                     <Sidebar user={user} />
-                    <main className="flex-1 ml-64 pt-16">
-                        <div className="p-8">
-                            <div className="flex justify-between items-center mb-6">
-                                <h1 className="text-2xl font-bold text-gray-900">Registration Management</h1>
+                    <main className="flex-1 lg:ml-64 pt-16">
+                        <div className="p-4 sm:p-6 md:p-8">
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-6">
+                                <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Registration Management</h1>
                                 <div className="text-sm text-gray-500">
                                     Total Registrations: {registrations.length}
                                 </div>
                             </div>
 
-                            <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+                            <div className="bg-white rounded-lg shadow-sm overflow-x-auto">
                                 <table className="min-w-full divide-y divide-gray-200">
                                     <thead className="bg-gray-50">
                                         <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                 User
                                             </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                 Event
                                             </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                 Event Date
                                             </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                 Registered On
                                             </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                 Status
                                             </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                 Actions
                                             </th>
                                         </tr>
@@ -72,33 +72,33 @@ export default async function AdminRegistrationsPage() {
                                     <tbody className="bg-white divide-y divide-gray-200">
                                         {registrations.map((registration) => (
                                             <tr key={registration.id}>
-                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                                                     <div>
-                                                        <div className="text-sm font-medium text-gray-900">
+                                                        <div className="text-xs sm:text-sm font-medium text-gray-900">
                                                             {registration.user.firstName} {registration.user.lastName}
                                                         </div>
-                                                        <div className="text-sm text-gray-500">
+                                                        <div className="text-xs sm:text-sm text-gray-500">
                                                             {registration.user.email}
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-900">
                                                     {registration.event.title}
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
                                                     {new Date(registration.event.startDate).toLocaleDateString()}
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
                                                     {new Date(registration.registeredAt).toLocaleDateString()}
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                                                     <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                                                         Confirmed
                                                     </span>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                    <button className="text-blue-600 hover:text-blue-900 mr-3">
-                                                        View Details
+                                                <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm font-medium">
+                                                    <button className="text-blue-600 hover:text-blue-900 mr-2 sm:mr-3">
+                                                        Details
                                                     </button>
                                                     <button className="text-red-600 hover:text-red-900">
                                                         Cancel

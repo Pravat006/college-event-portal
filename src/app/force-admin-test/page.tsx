@@ -1,10 +1,7 @@
 import { getCurrentUser, requireAdmin } from "@/lib/auth";
 
 export default async function ForceAdminTestPage() {
-    console.log('ForceAdminTestPage: Starting force admin test...')
-
     const currentUser = await getCurrentUser();
-    console.log('ForceAdminTestPage: Current user:', currentUser)
 
     if (!currentUser) {
         return (
@@ -19,13 +16,10 @@ export default async function ForceAdminTestPage() {
     let adminError = null;
 
     try {
-        console.log('ForceAdminTestPage: Calling requireAdmin()...')
         const adminUser = await requireAdmin();
         adminCheckResult = adminUser;
-        console.log('ForceAdminTestPage: requireAdmin() success:', adminUser)
     } catch (error) {
         adminError = error instanceof Error ? error.message : 'Unknown error';
-        console.log('ForceAdminTestPage: requireAdmin() failed:', adminError)
     }
 
     return (

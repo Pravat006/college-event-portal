@@ -50,7 +50,6 @@ export function UnregisterEventButton({
             onCancel(eventId)
             toast.success('Registration cancelled successfully')
         } catch (error) {
-            console.error('Error cancelling registration:', error)
             toast.error(error instanceof Error ? error.message : 'Failed to cancel registration')
         } finally {
             setIsLoading(false)
