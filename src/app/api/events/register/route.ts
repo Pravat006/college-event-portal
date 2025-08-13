@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
 
         // Send confirmation email
         try {
-            await sendEventConfirmationEmail({
+            const emailResult = await sendEventConfirmationEmail({
                 event: {
                     title: event.title,
                     description: event.description,
@@ -118,6 +118,11 @@ export async function POST(req: NextRequest) {
                     email: user.email
                 }
             })
+
+            if (!emailResult.success) {
+                console.error('Email sending failed:', emailResult.error)
+                // We continue with registration even if email fails
+            }
         } catch (emailError) {
             console.error('Failed to send confirmation email:', emailError)
             // Don't fail the registration if email fails
