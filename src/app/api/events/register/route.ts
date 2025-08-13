@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
                 userId: user.id,
                 eventId,
                 status: 'REGISTERED',
-                registrationNumber,
+                registrationNumber: BigInt(registrationNumber),
                 fullName,
                 semester
             }
@@ -94,7 +94,13 @@ export async function POST(req: NextRequest) {
             }
         })
 
-        return NextResponse.json(registration)
+        // Serialize for JSON response
+        const serializedRegistration = {
+            ...registration,
+            registrationNumber: registration.registrationNumber.toString()
+        }
+
+        return NextResponse.json(serializedRegistration)
     } catch (error) {
         console.error('Error registering for event:', error)
         return NextResponse.json(
@@ -128,11 +134,21 @@ export async function GET() {
             }
         })
 
-        return NextResponse.json(registrations)
+        // Convert BigInt to String to avoid serialization issues
+        const serializedRegistrations = registrations.map(reg => ({
+            ...reg,
+            registrationNumber: reg.registrationNumber.toString()
+        }))
+
+        return NextResponse.json({
+            data: serializedRegistrations,
+            success: true
+        })
     } catch (error) {
         console.error('Error fetching registered events:', error)
+        const message = error instanceof Error ? error.message : 'Failed to fetch registered events'
         return NextResponse.json(
-            { message: 'Failed to fetch registered events' },
+            { message, success: false },
             { status: 500 }
         )
     }

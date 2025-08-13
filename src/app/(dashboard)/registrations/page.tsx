@@ -12,6 +12,9 @@ interface Registration {
     id: string
     status: string
     registeredAt: string
+    registrationNumber: string
+    fullName: string
+    semester: number
     event: {
         id: string
         title: string
@@ -32,15 +35,31 @@ export default function RegistrationsPage() {
 
     const fetchRegistrations = async () => {
         try {
-            const response = await fetch('/api/events/register')
+            console.log('Fetching registrations...')
+            const response = await fetch('/api/events/register', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include'
+            })
+
+            console.log('Response status:', response.status)
+
             if (!response.ok) {
-                throw new Error('Failed to fetch registrations')
+                const errorText = await response.text()
+                console.error('API error response:', errorText)
+                throw new Error(`Failed to fetch registrations: ${response.status} ${errorText}`)
             }
+
             const result = await response.json()
             console.log('Registration API response:', result)
-            // Check if data exists and is an array
+
+            // The API returns { data: registrations, success: true }
             if (result.data && Array.isArray(result.data)) {
                 setRegistrations(result.data)
+            } else if (Array.isArray(result)) {
+                setRegistrations(result)
             } else {
                 console.error('Unexpected API response format:', result)
                 toast.error('Unexpected data format received')
@@ -48,7 +67,7 @@ export default function RegistrationsPage() {
             }
         } catch (error) {
             console.error('Failed to load registrations:', error)
-            toast.error('Failed to load registrations')
+            toast.error(`${error instanceof Error ? error.message : 'Failed to load registrations'}`)
             setRegistrations([])
         } finally {
             setLoading(false)
@@ -181,7 +200,11 @@ export default function RegistrationsPage() {
                                         <MapPin className="h-4 w-4 text-gray-500 flex-shrink-0" />
                                         <span className="truncate">{registration.event.location}</span>
                                     </div>
-                                    <div className="mt-2 sm:mt-0">
+                                    
+                                    <div className="mt-2 sm:mt-0 flex justify-between items-center">
+                                        <div className="text-xs text-gray-500">
+                                            Reg #: {registration.registrationNumber}
+                                        </div>
                                         <UnregisterEventButton
                                             eventId={registration.event.id}
                                             eventTitle={registration.event.title}
