@@ -36,10 +36,20 @@ export default function RegistrationsPage() {
             if (!response.ok) {
                 throw new Error('Failed to fetch registrations')
             }
-            const data = await response.json()
-            setRegistrations(data)
-        } catch {
+            const result = await response.json()
+            console.log('Registration API response:', result)
+            // Check if data exists and is an array
+            if (result.data && Array.isArray(result.data)) {
+                setRegistrations(result.data)
+            } else {
+                console.error('Unexpected API response format:', result)
+                toast.error('Unexpected data format received')
+                setRegistrations([])
+            }
+        } catch (error) {
+            console.error('Failed to load registrations:', error)
             toast.error('Failed to load registrations')
+            setRegistrations([])
         } finally {
             setLoading(false)
         }
@@ -120,7 +130,7 @@ export default function RegistrationsPage() {
         <div>
             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-4 sm:mb-6">My Registrations</h1>
 
-            {registrations.length === 0 ? (
+            {registrations && registrations.length === 0 ? (
                 <Card>
                     <CardContent className="text-center py-8 sm:py-12">
                         <Calendar className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-gray-400 mb-3 sm:mb-4" />

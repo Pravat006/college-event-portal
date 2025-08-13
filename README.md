@@ -51,6 +51,11 @@ A modern web application for managing college events, registrations, and event t
    npx prisma migrate dev
    ```
 
+   If you need to reset your database, you can use:
+   ```bash
+   npx prisma migrate reset --force
+   ```
+
 5. Run the development server:
    ```bash
    npm run dev

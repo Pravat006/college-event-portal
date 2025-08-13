@@ -9,60 +9,57 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  clerkId   String   @unique
-  email     String   @unique
-  firstName String
-  lastName  String
-  imageUrl  String?
-  role      Role     @default(USER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
+  id            String         @id @default(cuid())
+  clerkId       String         @unique
+  email         String         @unique
+  firstName     String
+  lastName      String
+  imageUrl      String?
+  role          Role           @default(USER)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   eventsCreated Event[]        @relation("EventCreator")
-  registrations Registration[]
   feedback      Feedback[]
   notifications Notification[]
+  registrations Registration[]
 
   @@map("users")
 }
 
 model Event {
-  id          String      @id @default(cuid())
-  title       String
-  description String
-  imageUrl    String?
-  location    String
-  startDate   DateTime
-  endDate     DateTime
-  capacity    Int
-  price       Float?      @default(0)
-  category    Category    @default(ACADEMIC)
-  status      EventStatus @default(DRAFT)
-  createdById String
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-
-  // Relations
+  id            String         @id @default(cuid())
+  title         String
+  description   String
+  imageUrl      String?
+  location      String
+  startDate     DateTime
+  endDate       DateTime
+  capacity      Int
+  price         Float?         @default(0)
+  category      Category       @default(ACADEMIC)
+  status        EventStatus    @default(DRAFT)
+  createdById   String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   createdBy     User           @relation("EventCreator", fields: [createdById], references: [id])
-  registrations Registration[]
   feedback      Feedback[]
   notifications Notification[]
+  registrations Registration[]
 
   @@map("events")
 }
 
 model Registration {
-  id           String             @id @default(cuid())
-  userId       String
-  eventId      String
-  status       RegistrationStatus @default(REGISTERED)
-  registeredAt DateTime           @default(now())
-
-  // Relations
-  user  User  @relation(fields: [userId], references: [id])
-  event Event @relation(fields: [eventId], references: [id])
+  id                 String             @id @default(cuid())
+  userId             String
+  eventId            String
+  status             RegistrationStatus @default(REGISTERED)
+  registeredAt       DateTime           @default(now())
+  fullName           String
+  registrationNumber BigInt
+  semester           Int
+  event              Event              @relation(fields: [eventId], references: [id])
+  user               User               @relation(fields: [userId], references: [id])
 
   @@unique([userId, eventId])
   @@map("registrations")
@@ -72,13 +69,11 @@ model Feedback {
   id        String   @id @default(cuid())
   userId    String
   eventId   String
-  rating    Int // 1-5 stars
+  rating    Int
   comment   String?
   createdAt DateTime @default(now())
-
-  // Relations
-  user  User  @relation(fields: [userId], references: [id])
-  event Event @relation(fields: [eventId], references: [id])
+  event     Event    @relation(fields: [eventId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
 
   @@unique([userId, eventId])
   @@map("feedback")
@@ -93,10 +88,8 @@ model Notification {
   type      NotificationType
   read      Boolean          @default(false)
   createdAt DateTime         @default(now())
-
-  // Relations
-  user  User   @relation(fields: [userId], references: [id])
-  event Event? @relation(fields: [eventId], references: [id])
+  event     Event?           @relation(fields: [eventId], references: [id])
+  user      User             @relation(fields: [userId], references: [id])
 
   @@map("notifications")
 }
@@ -133,6 +126,6 @@ enum NotificationType {
   EVENT_UPDATED
   EVENT_CANCELLED
   REGISTRATION_CONFIRMED
-  REGISTRATION_CANCELLED
   FEEDBACK_REQUEST
+  REGISTRATION_CANCELLED
 }

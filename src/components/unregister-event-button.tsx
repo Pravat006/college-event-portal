@@ -42,13 +42,14 @@ export function UnregisterEventButton({
                 body: JSON.stringify({ eventId }),
             })
 
+            const result = await response.json()
+
             if (!response.ok) {
-                const error = await response.json()
-                throw new Error(error.message || 'Failed to cancel registration')
+                throw new Error(result.message || 'Failed to cancel registration')
             }
 
             onCancel(eventId)
-            toast.success('Registration cancelled successfully')
+            toast.success(result.message || 'Registration cancelled successfully')
         } catch (error) {
             toast.error(error instanceof Error ? error.message : 'Failed to cancel registration')
         } finally {

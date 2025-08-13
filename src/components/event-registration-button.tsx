@@ -3,14 +3,22 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import EventRegistrationForm from '@/components/event-registration-form'
 import toast from 'react-hot-toast'
 
 interface Event {
     id: string
     title: string
+    description: string
+    imageUrl?: string
+    location: string
+    startDate: Date
+    endDate: Date
+    capacity: number
+    price: number
+    category: string
     status: string
     _count: { registrations: number }
-    capacity: number
 }
 
 interface User {
@@ -31,35 +39,19 @@ export default function EventRegistrationButton({
     isRegistered = false,
     isFull
 }: EventRegistrationButtonProps) {
-    const [registering, setRegistering] = useState(false)
+    const [showForm, setShowForm] = useState(false)
     const router = useRouter()
 
-    const handleRegister = async () => {
+    const handleRegisterClick = () => {
         if (!user) {
             router.push('/sign-in')
             return
         }
+        setShowForm(true)
+    }
 
-        setRegistering(true)
-        try {
-            const response = await fetch('/api/events/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ eventId: event.id })
-            })
-
-            if (response.ok) {
-                toast.success('Successfully registered! Check your email for confirmation.')
-                window.location.reload()
-            } else {
-                const errJson = await response.json()
-                toast.error(errJson.message || 'Registration failed')
-            }
-        } catch {
-            toast.error('Something went wrong')
-        } finally {
-            setRegistering(false)
-        }
+    const handleRegistrationSuccess = () => {
+        window.location.reload()
     }
 
     // Don't show button for admins
@@ -76,6 +68,15 @@ export default function EventRegistrationButton({
         return (
             <Button disabled className="w-full" variant="destructive">
                 Event Cancelled
+            </Button>
+        )
+    }
+
+    // Event is not published
+    if (event.status !== 'PUBLISHED') {
+        return (
+            <Button disabled className="w-full" variant="outline">
+                Not Open for Registration
             </Button>
         )
     }
@@ -101,7 +102,7 @@ export default function EventRegistrationButton({
     // User not logged in
     if (!user) {
         return (
-            <Button onClick={handleRegister} className="w-full">
+            <Button onClick={handleRegisterClick} className="w-full">
                 Sign In to Register
             </Button>
         )
@@ -109,12 +110,21 @@ export default function EventRegistrationButton({
 
     // Available for registration
     return (
-        <Button
-            onClick={handleRegister}
-            disabled={registering}
-            className="w-full"
-        >
-            {registering ? 'Registering...' : 'Register Now'}
-        </Button>
+        <>
+            <Button
+                onClick={handleRegisterClick}
+                className="w-full"
+            >
+                Register Now
+            </Button>
+
+            {showForm && (
+                <EventRegistrationForm
+                    event={event}
+                    onClose={() => setShowForm(false)}
+                    onSuccess={handleRegistrationSuccess}
+                />
+            )}
+        </>
     )
 }
