@@ -53,7 +53,12 @@ export default function EventRegistrationForm({ event, onClose, onSuccess }: Eve
     const onSubmit = async (data: RegistrationFormData) => {
         setLoading(true)
         try {
-            const response = await fetch('/api/events/register', {
+            // Get the base URL for API calls
+            const baseUrl = typeof window !== 'undefined' && window.location.origin
+                ? window.location.origin
+                : process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+
+            const response = await fetch(`${baseUrl}/api/events/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -62,24 +67,37 @@ export default function EventRegistrationForm({ event, onClose, onSuccess }: Eve
                 })
             })
 
-            const result = await response.json()
+            if (!response.ok) {
+                const errorText = await response.text()
+                console.error('Registration API error:', errorText)
+                let errorMessage = 'Registration failed'
 
-            if (response.ok) {
-                toast.success('Successfully registered! Check your email for confirmation.')
-                onSuccess()
-                onClose()
-            } else {
-                toast.error(result.message || 'Registration failed')
+                try {
+                    const errorData = JSON.parse(errorText)
+                    errorMessage = errorData.message || errorMessage
 
-                // If there are field-specific errors, display them
-                if (result.errors) {
-                    Object.entries(result.errors).forEach(([field, errors]) => {
-                        if (Array.isArray(errors) && errors.length > 0) {
-                            toast.error(`${field}: ${errors[0]}`)
-                        }
-                    })
+                    // Display field errors if available
+                    if (errorData.errors) {
+                        Object.entries(errorData.errors).forEach(([field, errors]) => {
+                            if (Array.isArray(errors) && errors.length > 0) {
+                                toast.error(`${field}: ${errors[0]}`)
+                            }
+                        })
+                    }
+                } catch (e) {
+                    // If JSON parsing fails, use the raw error text
+                    errorMessage = errorText || errorMessage
                 }
+
+                toast.error(errorMessage)
+                setLoading(false)
+                return
             }
+
+            const result = await response.json()
+            toast.success('Successfully registered! Check your email for confirmation.')
+            onSuccess()
+            onClose()
         } catch (error) {
             console.error('Registration error:', error)
             toast.error('Something went wrong with the registration process')
@@ -236,3 +254,45 @@ export default function EventRegistrationForm({ event, onClose, onSuccess }: Eve
         </div>
     )
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

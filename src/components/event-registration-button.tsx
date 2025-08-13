@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, memo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import EventRegistrationForm from '@/components/event-registration-form'
 import toast from 'react-hot-toast'
+import { Loader2 } from 'lucide-react'
 
 interface Event {
     id: string
@@ -33,25 +34,39 @@ interface EventRegistrationButtonProps {
     isFull: boolean
 }
 
-export default function EventRegistrationButton({
+function EventRegistrationButton({
     event,
     user,
     isRegistered = false,
     isFull
 }: EventRegistrationButtonProps) {
     const [showForm, setShowForm] = useState(false)
+    const [isLoading, setIsLoading] = useState(false)
     const router = useRouter()
 
     const handleRegisterClick = () => {
         if (!user) {
-            router.push('/sign-in')
+            setIsLoading(true)
+            try {
+                router.push('/sign-in')
+            } catch (error) {
+                console.error('Navigation error:', error)
+                toast.error('Unable to navigate to sign-in page')
+                setIsLoading(false)
+            }
             return
         }
         setShowForm(true)
     }
 
     const handleRegistrationSuccess = () => {
-        window.location.reload()
+        toast.success('Event registration successful!')
+        // Use router.refresh() instead of full page reload for better UX
+        router.refresh()
+        // Fallback to window.location.reload() if router.refresh() doesn't update the UI
+        setTimeout(() => {
+            window.location.reload()
+        }, 1000)
     }
 
     // Don't show button for admins
@@ -102,8 +117,19 @@ export default function EventRegistrationButton({
     // User not logged in
     if (!user) {
         return (
-            <Button onClick={handleRegisterClick} className="w-full">
-                Sign In to Register
+            <Button
+                onClick={handleRegisterClick}
+                className="w-full"
+                disabled={isLoading}
+            >
+                {isLoading ? (
+                    <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Redirecting...
+                    </>
+                ) : (
+                    'Sign In to Register'
+                )}
             </Button>
         )
     }
@@ -114,6 +140,7 @@ export default function EventRegistrationButton({
             <Button
                 onClick={handleRegisterClick}
                 className="w-full"
+                disabled={isLoading}
             >
                 Register Now
             </Button>
@@ -128,3 +155,9 @@ export default function EventRegistrationButton({
         </>
     )
 }
+
+// Create a memoized version of the component to prevent unnecessary re-renders
+const MemoizedEventRegistrationButton = memo(EventRegistrationButton);
+
+// Export the memoized version as default
+export default MemoizedEventRegistrationButton;
