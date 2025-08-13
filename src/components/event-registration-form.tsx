@@ -27,7 +27,7 @@ interface Event {
     id: string
     title: string
     description: string
-    imageUrl?: string | null
+    imageUrl: string | null
     location: string
     startDate: Date
     endDate: Date

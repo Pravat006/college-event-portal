@@ -11,12 +11,12 @@ interface Event {
     id: string
     title: string
     description: string
-    imageUrl?: string
+    imageUrl: string | null
     location: string
     startDate: Date
     endDate: Date
     capacity: number
-    price: number
+    price: number | null
     category: string
     status: string
     _count: { registrations: number }
