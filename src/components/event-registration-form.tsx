@@ -53,12 +53,9 @@ export default function EventRegistrationForm({ event, onClose, onSuccess }: Eve
     const onSubmit = async (data: RegistrationFormData) => {
         setLoading(true)
         try {
-            // Get the base URL for API calls
-            const baseUrl = typeof window !== 'undefined' && window.location.origin
-                ? window.location.origin
-                : process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-
-            const response = await fetch(`${baseUrl}/api/events/register`, {
+            // Use relative URL path instead of trying to determine base URL
+            // This ensures it works in both development and production
+            const response = await fetch('/api/events/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -84,7 +81,7 @@ export default function EventRegistrationForm({ event, onClose, onSuccess }: Eve
                             }
                         })
                     }
-                } catch (e) {
+                } catch {
                     // If JSON parsing fails, use the raw error text
                     errorMessage = errorText || errorMessage
                 }
@@ -94,7 +91,7 @@ export default function EventRegistrationForm({ event, onClose, onSuccess }: Eve
                 return
             }
 
-            const result = await response.json()
+            await response.json()
             toast.success('Successfully registered! Check your email for confirmation.')
             onSuccess()
             onClose()
