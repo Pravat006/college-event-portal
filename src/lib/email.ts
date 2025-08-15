@@ -24,6 +24,7 @@ export async function sendEventConfirmationEmail({ event, user }: EventEmail) {
             console.error('Resend API error:', error)
             return { success: false, error }
         }
+        // console.log("email data: ", data)
         return { success: true, data }
     } catch (error) {
         console.error('Error sending confirmation email:', error)

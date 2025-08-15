@@ -57,9 +57,13 @@ export async function POST(req: NextRequest) {
                 registrationNumber: BigInt(registrationNumber),
                 fullName,
                 semester
+            },
+            include: {
+                user: true,
+
             }
         })
-
+        // console.log('Registration created:', registration)
         // Send confirmation email
         try {
             await sendEventConfirmationEmail({
@@ -73,9 +77,9 @@ export async function POST(req: NextRequest) {
                     category: event.category
                 },
                 user: {
-                    firstName: user.firstName,
-                    lastName: user.lastName,
-                    email: user.email
+                    firstName: registration.user.firstName,
+                    lastName: registration.user.lastName,
+                    email: registration.user.email
                 }
             })
         } catch (emailError) {
