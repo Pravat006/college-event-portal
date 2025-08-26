@@ -15,8 +15,8 @@ export async function sendEventConfirmationEmail({ event, user }: EventEmail) {
 
     try {
         const { data, error } = await resend.emails.send({
-            from: "College Events <events@resend.dev>", // Change this to your verified domain
-            to: [user.email],
+            from: "College Events <events@resend.dev>",
+            to: user.email,
             subject: `Event Registration: ${event.title}`,
             html: htmlContent
         })
@@ -46,7 +46,7 @@ export async function sendEventUpdateEmail({ event, user, updateType }: EventEma
 
         const { data, error } = await resend.emails.send({
             from: 'College Events <events@resend.dev>', // Change this to your verified domain
-            to: [user.email],
+            to: user.email,
             subject,
             html: htmlContent,
         })

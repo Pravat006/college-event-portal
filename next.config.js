@@ -8,7 +8,8 @@ const nextConfig = {
             'images.unsplash.com',
             'cdn.pixabay.com',
             'images.pexels.com',
-            'www.brightidea.com'
+            'www.brightidea.com',
+            'ik.imagekit.io'
         ]
     }
 }
