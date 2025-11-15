@@ -9,7 +9,8 @@ import {
     Users,
     Star,
     Settings,
-    BarChart3
+    BarChart3,
+    LucideMessageCircle
 } from 'lucide-react'
 
 interface SidebarProps {
@@ -24,7 +25,8 @@ const navigation = [
     { name: 'My Registrations', href: '/registrations', icon: Users, roles: ['USER'] },
     { name: 'User Management', href: '/admin/users', icon: Users, roles: ['ADMIN'] },
     { name: 'Analytics', href: '/admin/analytics', icon: BarChart3, roles: ['ADMIN'] },
-    { name: 'Feedback', href: '/feedback', icon: Star, roles: ['USER', 'ADMIN'] },
+    { name: 'Send Updates', href: '/admin/send-updates', icon: LucideMessageCircle, roles: ['ADMIN'] },
+    { name: 'Feedback', href: '/admin/feedback', icon: Star, roles: ['ADMIN'] },
     { name: 'Settings', href: '/settings', icon: Settings, roles: ['USER', 'ADMIN'] },
 ]
 
@@ -36,7 +38,7 @@ export default function Sidebar({ user }: SidebarProps) {
     )
 
     return (
-        <div className="fixed left-0 top-16 h-[calc(100vh-4rem)] bg-white border-r border-gray-200 overflow-y-auto z-40 w-64 hidden lg:block">
+        <div className="fixed left-0 top-16 h-[calc(100vh-4rem)] bg-background border    border-border overflow-y-auto z-40 w-64 hidden lg:block">
             <nav className="p-4 space-y-2">
                 {filteredNavigation.map((item) => {
                     const isActive = pathname === item.href
@@ -51,7 +53,7 @@ export default function Sidebar({ user }: SidebarProps) {
                                     : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                             )}
                         >
-                            <item.icon className="h-5 w-5 mr-3 flex-shrink-0" />
+                            <item.icon className="h-5 w-5 mr-3 shrink-0" />
                             <span className="truncate">{item.name}</span>
                         </Link>
                     )

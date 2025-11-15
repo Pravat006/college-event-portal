@@ -97,12 +97,6 @@ function generateEventUpdateHTML({ event, user, updateType }: EventEmail & { upd
           </div>
         ` : ''}
 
-        <div style="text-align: center; margin: 32px 0;">
-          <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard" 
-             style="display: inline-block; background: #2563eb; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600;">
-            View My Events
-          </a>
-        </div>
 
         <div style="text-align: center; margin-top: 32px; padding-top: 24px; border-top: 1px solid #e2e8f0; color: #64748b; font-size: 14px;">
           <p>Questions? Contact us at events@college.edu</p>

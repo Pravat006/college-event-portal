@@ -1,3 +1,4 @@
+import generateCertificateEmailHTML from "@/components/emails/send-certificate"
 import eventEmailHTML from "@/components/emails/send-event-confirmation"
 import generateEventUpdateHTML from "@/components/emails/send-event-update"
 import { EventEmail } from "@/types/event"
@@ -63,4 +64,48 @@ export async function sendEventUpdateEmail({ event, user, updateType }: EventEma
         return { success: false, error }
     }
 
+}
+
+
+export async function sendCertificateEmail({ event, user, certificateHtml, position }: {
+    event: {
+        title: string
+        description: string
+        startDate: Date
+    }
+    user: {
+        firstName: string
+        lastName: string
+        email: string
+    }
+    certificateHtml: string
+    position: string
+}) {
+    try {
+        const isParticipation = position.toLowerCase().includes('participation')
+        const certificateType = isParticipation ? 'Participation Certificate' : 'Achievement Certificate'
+
+        const { data, error } = await resend.emails.send({
+            from: 'College Events <events@yourdomain.com>',
+            to: [user.email],
+            subject: `🏆 Your ${certificateType} - ${event.title}`,
+            html: generateCertificateEmailHTML({ event, user, position, isParticipation }),
+            attachments: [
+                {
+                    filename: `Certificate_${user.firstName}_${user.lastName}.html`,
+                    content: certificateHtml,
+                },
+            ],
+        })
+
+        if (error) {
+            console.error('Error sending certificate email:', error)
+            return { success: false, error }
+        }
+
+        return { success: true, data }
+    } catch (error) {
+        console.error('Error sending certificate email:', error)
+        return { success: false, error }
+    }
 }

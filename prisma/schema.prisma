@@ -9,19 +9,22 @@ datasource db {
 }
 
 model User {
-  id            String         @id @default(cuid())
-  clerkId       String         @unique
-  email         String         @unique
-  firstName     String
-  lastName      String
-  imageUrl      String?
-  role          Role           @default(USER)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  eventsCreated Event[]        @relation("EventCreator")
-  feedback      Feedback[]
-  notifications Notification[]
-  registrations Registration[]
+  id              String         @id @default(cuid())
+  clerkId         String         @unique
+  email           String         @unique
+  firstName       String
+  lastName        String
+  imageUrl        String?
+  role            Role           @default(USER)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  eventUpdates    EventUpdate[]
+  eventsCreated   Event[]        @relation("EventCreator")
+  feedback        Feedback[]
+  notifications   Notification[]
+  registrations   Registration[]
+  declaredWinners Winner[]       @relation("WinnerDeclarer")
+  winners         Winner[]       @relation("UserWinner")
 
   @@map("users")
 }
@@ -41,10 +44,12 @@ model Event {
   createdById   String
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
+  updates       EventUpdate[]
   createdBy     User           @relation("EventCreator", fields: [createdById], references: [id])
   feedback      Feedback[]
   notifications Notification[]
   registrations Registration[]
+  winners       Winner[]       @relation("EventWinner")
 
   @@map("events")
 }
@@ -94,6 +99,52 @@ model Notification {
   @@map("notifications")
 }
 
+model EventUpdate {
+  id       String   @id @default(cuid())
+  eventId  String
+  content  String
+  senderId String
+  sentAt   DateTime @default(now())
+  event    Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  sentBy   User     @relation(fields: [senderId], references: [id])
+
+  @@index([eventId])
+  @@index([senderId])
+}
+
+model Winner {
+  id               String         @id @default(cuid())
+  userId           String
+  eventId          String
+  position         WinnerPosition
+  declaredAt       DateTime       @default(now())
+  declaredByUserId String
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  certificate      Certificate?
+  declaredBy       User           @relation("WinnerDeclarer", fields: [declaredByUserId], references: [id])
+  event            Event          @relation("EventWinner", fields: [eventId], references: [id])
+  user             User           @relation("UserWinner", fields: [userId], references: [id])
+
+  @@unique([userId, eventId])
+  @@map("winners")
+}
+
+model Certificate {
+  id              String    @id @default(cuid())
+  winnerId        String    @unique
+  certificateUrl  String?
+  certificateData Json?
+  issuedAt        DateTime  @default(now())
+  emailSent       Boolean   @default(false)
+  emailSentAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  winner          Winner    @relation(fields: [winnerId], references: [id], onDelete: Cascade)
+
+  @@map("certificates")
+}
+
 enum Role {
   USER
   ADMIN
@@ -128,4 +179,10 @@ enum NotificationType {
   REGISTRATION_CONFIRMED
   FEEDBACK_REQUEST
   REGISTRATION_CANCELLED
+}
+
+enum WinnerPosition {
+  FIRST
+  SECOND
+  THIRD
 }

@@ -67,22 +67,22 @@ export default function NotificationDropdown() {
                     )}
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[280px] sm:w-80">{unreadCount > 0 && (
+            <DropdownMenuContent align="end" className="w-[280px] bg-white/5 backdrop-blur-lg sm:w-80">{unreadCount > 0 && (
                 <div className="px-4 py-2 border-b border-gray-100">
-                    <p className="text-xs font-medium text-gray-500">
+                    <p className="text-xs font-medium ">
                         {unreadCount} unread {unreadCount === 1 ? 'notification' : 'notifications'}
                     </p>
                 </div>
             )}
                 {notifications.length === 0 ? (
-                    <div className="p-4 text-center text-gray-500">
+                    <div className="p-4 text-center ">
                         No notifications
                     </div>
                 ) : (
                     notifications.slice(0, 5).map((notification) => (
                         <DropdownMenuItem
                             key={notification.id}
-                            className="flex-col items-start p-4 cursor-pointer"
+                            className="flex-col items-start p-4 cursor-pointer "
                             onClick={() => markAsRead(notification.id)}
                         >
                             <div className="flex justify-between items-start w-full mb-1">
@@ -91,7 +91,7 @@ export default function NotificationDropdown() {
                                     <div className="h-2 w-2 bg-blue-600 rounded-full" />
                                 )}
                             </div>
-                            <p className="text-xs text-gray-600">{notification.message}</p>
+                            <p className="text-xs ">{notification.message}</p>
                         </DropdownMenuItem>
                     ))
                 )}

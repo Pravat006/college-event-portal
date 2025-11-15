@@ -3,14 +3,12 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import Navbar from "@/components/navbar";
 import Sidebar from "@/components/sidebar";
-// import DashboardStats from "@/components/dashboard-stats";
 
 export default async function AdminPage() {
     try {
-        // This ensures only admins can access this page
+
         const user = await requireAdmin();
 
-        // Get admin dashboard data
         const [totalEvents, totalRegistrations, feedbackCount] = await Promise.all([
             prisma.event.count(),
             prisma.registration.count(),
@@ -66,7 +64,6 @@ export default async function AdminPage() {
             </div>
         );
     } catch {
-        // If user is not an admin, redirect to home
         redirect("/");
     }
 }

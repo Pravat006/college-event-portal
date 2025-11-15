@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth } from '@/lib/auth'
+import { requireAuth, getCurrentUser } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { sendEventConfirmationEmail } from '@/lib/email'
 
@@ -8,7 +8,6 @@ export async function POST(req: NextRequest) {
         const user = await requireAuth()
         const { eventId, registrationNumber, fullName, semester } = await req.json()
 
-        // Check if event exists and has capacity
         const event = await prisma.event.findUnique({
             where: { id: eventId },
             include: {
@@ -31,7 +30,6 @@ export async function POST(req: NextRequest) {
             )
         }
 
-        // Check if already registered
         const existingRegistration = await prisma.registration.findUnique({
             where: {
                 userId_eventId: {
@@ -65,6 +63,7 @@ export async function POST(req: NextRequest) {
         })
         // console.log('Registration created:', registration)
         // Send confirmation email
+        console.log('Sending confirmation email to:', registration.user.email)
         try {
             await sendEventConfirmationEmail({
                 event: {
@@ -82,6 +81,7 @@ export async function POST(req: NextRequest) {
                     email: registration.user.email
                 }
             })
+            console.log('Confirmation email sent successfully')
         } catch (emailError) {
             console.error('Failed to send confirmation email:', emailError)
             // Don't fail the registration if email fails
@@ -115,44 +115,54 @@ export async function POST(req: NextRequest) {
 }
 
 // get all the registered events by user
-
 export async function GET() {
     try {
-        const user = await requireAuth()
+        const user = await getCurrentUser()
+
+        if (!user) {
+            return NextResponse.json(
+                { message: 'Unauthorized' },
+                { status: 401 }
+            )
+        }
 
         const registrations = await prisma.registration.findMany({
             where: {
-                userId: user.id
+                userId: user.id,
             },
             include: {
                 event: {
                     select: {
                         id: true,
                         title: true,
+                        description: true,
+                        imageUrl: true,
                         startDate: true,
                         endDate: true,
                         location: true,
-                        status: true
+                        status: true,
+                        category: true,
                     }
                 }
+            },
+            orderBy: {
+                registeredAt: 'desc'
             }
         })
 
-        // Convert BigInt to String to avoid serialization issues
+        // Serialize BigInt values to strings
         const serializedRegistrations = registrations.map(reg => ({
             ...reg,
             registrationNumber: reg.registrationNumber.toString()
         }))
 
         return NextResponse.json({
-            data: serializedRegistrations,
-            success: true
+            data: serializedRegistrations
         })
     } catch (error) {
-        console.error('Error fetching registered events:', error)
-        const message = error instanceof Error ? error.message : 'Failed to fetch registered events'
+        console.error('Error fetching registrations:', error)
         return NextResponse.json(
-            { message, success: false },
+            { message: 'Failed to fetch registrations' },
             { status: 500 }
         )
     }

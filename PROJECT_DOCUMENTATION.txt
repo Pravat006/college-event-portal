@@ -1,0 +1,244 @@
+College Event Portal — Project Documentation
+
+1. Project Purpose
+
+The College Event Portal is a web application built to help colleges and student organizations create, manage, promote, and run events. It provides a streamlined workflow for event organizers to publish events, collect registrations, send email notifications, and communicate updates to attendees. For students and staff it provides a responsive UI to discover events, register (and receive confirmations), and view updates and feedback requests.
+
+2. Problem solved
+
+- Decentralized event management: Brings event creation, registration, attendance tracking, and communication into a single, reusable platform.
+- Reliable email notifications: Sends confirmations and updates so attendees are kept informed when events change.
+- Access control and admin features: Role-based access (user vs. admin) so only authorized staff can create/publish/cancel events or access admin analytics.
+- Registration and capacity handling: Handles registration state, unique registration numbers, and enforces per-event capacity.
+- Real-time updates & webhooks: Integrates with authentication webhooks and supports real-time flows (via sockets) and background notifications.
+
+3. High-level solution overview
+
+The application is implemented as a Next.js app (app-router) with server-side API routes and a Prisma-backed PostgreSQL database. Authentication is handled by Clerk. Emails are sent via Resend. Incoming authentication webhooks (from Clerk) are verified via Svix. Prisma is used as the canonical data model and migration engine; Prisma Client is generated and used from server code. Socket.io is included for realtime features (live updates/notifications).
+
+4. Tech stack (languages, frameworks, libraries)
+
+- Language: TypeScript (project uses React + Next.js with TypeScript typings)
+- Frontend framework: Next.js (app-router) v15
+- UI: React 19
+- Styling: Tailwind CSS (+ tailwind utilities and tw-animate-css)
+- State / Data fetching: TanStack React Query
+- Form validation: react-hook-form + zod (and @hookform/resolvers)
+- Icons & animations: lucide-react, framer-motion, tabler icons
+- Realtime: socket.io (server & client)
+- ORM / Database: Prisma (with Prisma Client and prisma migrate) + Prisma Accelerate extension
+- Database engine: PostgreSQL
+- Authentication: Clerk (Clerk Next.js integration)
+- Email delivery: Resend
+- Webhook validation: Svix
+- Build & bundler: Next.js build system
+- Lint & tooling: ESLint, TypeScript, shadcn
+
+Key dependencies (from package.json)
+- next 15.x, react 19.x, @clerk/nextjs, @prisma/client, prisma, socket.io, socket.io-client, resend, svix, @tanstack/react-query, zod, react-hook-form, tailwindcss, eslint, typescript
+
+5. Data model summary (Prisma)
+
+The Prisma schema (prisma/schema.prisma) defines the following primary models:
+
+- User
+  - Fields: id, clerkId, email, firstName, lastName, imageUrl, role (USER|ADMIN), timestamps
+  - Relations: eventsCreated, feedback, notifications, registrations, eventUpdates
+
+- Event
+  - Fields: id, title, description, imageUrl, location, startDate, endDate, capacity, price, category, status, createdById, timestamps
+  - Relations: createdBy (User), feedback, notifications, registrations, updates
+
+- Registration
+  - Fields: id, userId, eventId, status (REGISTERED|ATTENDED|CANCELLED), registeredAt, fullName, registrationNumber (BigInt), semester
+  - Unique constraint: [userId, eventId]
+
+- Feedback
+  - Fields: id, userId, eventId, rating, comment, createdAt
+  - Unique constraint: [userId, eventId]
+
+- Notification
+  - Fields: id, userId, eventId?, title, message, type, read, createdAt
+
+- EventUpdate
+  - Fields: id, eventId, content (text), senderId, sentAt
+  - Indexes: eventId, senderId
+
+- Enums: Role, Category, EventStatus, RegistrationStatus, NotificationType
+
+6. Project structure (important folders and files)
+
+- /src/app - Next.js app router pages and API routes
+  - (auth) - Clerk sign-in and sign-up flows
+  - (dashboard) - User dashboard routes
+  - admin - Admin pages and analytics
+  - api - Internal server API routes (events, auth, webhooks, notifications, debug)
+  - auth-redirect - Route used after Clerk sign-in to create/check user in DB
+
+- /src/components - Reusable UI components (forms, buttons, event grid, nav, sidebar)
+  - emails - Email templates/helpers used by server email functions
+  - ui - base UI primitives (button, card, toast, etc.)
+
+- /src/lib - Server and shared utilities
+  - auth.ts - helpers to map Clerk session -> app User and guard routes
+  - prisma.ts - Prisma client instance (generated to src/generated/prisma)
+  - email.ts - wrappers around Resend to send confirmation/update emails
+  - utils.ts - misc helpers
+  - socket - socket helpers (client/server)
+
+- /src/generated/prisma - Generated Prisma client output (do not edit)
+
+- /prisma - Prisma schema and migration history
+  - schema.prisma - canonical schema definition
+  - migrations/ - migration SQL files
+
+- /public - static assets and fonts
+- /scripts - utility scripts (checks, deploy helpers, etc.)
+- next.config.js - Next.js configuration
+- prisma/seed.ts ( invoked via `prisma:seed`) - (if present) seeds database for development
+
+7. Environment variables (required / recommended)
+
+Required for local development and production (as used across the repository and docs):
+- DATABASE_URL - PostgreSQL connection string used by Prisma and the app
+- NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY - Clerk publishable key (client-side)
+- CLERK_SECRET_KEY - Clerk secret key (server-side)
+- CLERK_WEBHOOK_SECRET - Secret used to verify Clerk webhooks via Svix
+- RESEND_API_KEY - API key for Resend email delivery
+- NEXT_PUBLIC_APP_URL - Publicly reachable URL of the production app (used in some redirects and email links)
+
+Optional / environment hints
+- NEXT_PUBLIC_CLERK_SIGN_IN_URL, NEXT_PUBLIC_CLERK_SIGN_UP_URL, NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL, NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL (used by docs and redirects)
+
+8. Setup / Local development
+
+Minimum steps to run the project locally (assumes Node.js >= 20 and pnpm/npm/yarn installed):
+
+1) Install dependencies
+
+   npm install
+
+2) Create a .env file in project root with required variables (use .env.example if provided). At minimum set:
+
+   DATABASE_URL=postgresql://user:pass@host:port/dbname
+   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable
+   CLERK_SECRET_KEY=your_clerk_secret
+   CLERK_WEBHOOK_SECRET=your_clerk_webhook_secret
+   RESEND_API_KEY=your_resend_api_key
+   NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+3) Generate Prisma client (the build script also runs prisma generate):
+
+   npx prisma generate
+
+4) Run migrations (if starting from scratch)
+
+   npx prisma migrate dev
+
+   Note: The repository contains migration SQL files under /prisma/migrations. If you are restoring a DB from these migrations, use migrate commands to apply.
+
+5) Seed the database (if desired)
+
+   npm run prisma:seed
+
+6) Start development server
+
+   npm run dev
+
+   The app should be available at http://localhost:3000 (or the value of NEXT_PUBLIC_APP_URL)
+
+9. Build and production
+
+- Build (will run `prisma generate` before Next build):
+
+  npm run build
+
+- Start production server (produces a server bundle in dist and runs it):
+
+  npm run start
+
+- Recommended deployment: Vercel. Steps: push to GitHub, connect repo in Vercel, configure environment variables in Vercel dashboard, deploy. Ensure the production PostgreSQL database is reachable and migrations have been applied.
+
+10. Integrations and external services
+
+- Clerk: Handles authentication (sign-up / sign-in UI and server session validation). The app listens to Clerk webhooks and verifies them with Svix using CLERK_WEBHOOK_SECRET.
+- Resend: Used to send transactional emails (event confirmations, updates). Requires RESEND_API_KEY and a verified sending domain.
+- Svix: Used to verify Clerk webhooks (the Svix Webhook helper is used to validate incoming webhook signatures).
+- PostgreSQL: Database engine used with Prisma ORM. Migration history is in /prisma/migrations.
+- Socket.io: Included for realtime features like live event updates or notifications.
+
+11. Security and best practices
+
+- Do not commit environment variables or secrets into the repository.
+- Keep `DATABASE_URL`, `CLERK_SECRET_KEY`, `RESEND_API_KEY`, and `CLERK_WEBHOOK_SECRET` in environment management (Vercel secrets or other provider).
+- Prisma client is generated into `src/generated/prisma`. Do not edit generated code.
+- Verify email sending domain in Resend before sending production emails.
+- Apply database migrations in a safe manner (don’t run destructive changes against production without backups).
+
+12. Testing, linting and type checking
+
+- Lint: `npm run lint` (uses ESLint and next lint rules)
+- Types: Project uses TypeScript. Ensure `tsc` passes for type checking (TypeScript compiler settings in tsconfig.json)
+- Unit / integration testing: No dedicated test framework found in repository root; add Jest/Playwright or Vitest if you want automated tests. Existing codebase contains debug routes to inspect DB state during development.
+
+13. Troubleshooting (common issues and fixes)
+
+- Database connection errors:
+  - Verify `DATABASE_URL` is correct and the database is accessible from your environment (network restrictions, cloud provider rules).
+  - Apply migrations with `npx prisma migrate deploy` in production or `npx prisma migrate dev` in development.
+
+- Email delivery failures:
+  - Ensure `RESEND_API_KEY` is set and the sending domain is verified in Resend.
+  - Check server logs for Resend API errors and update sender addresses.
+
+- Authentication / Clerk errors:
+  - Verify `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` (client) and `CLERK_SECRET_KEY` (server) are set correctly.
+  - Ensure redirect URLs configured in Clerk dashboard match application routes (auth-redirect flows are used in code).
+
+- Webhook signature verification failures:
+  - Confirm `CLERK_WEBHOOK_SECRET` is set and matches the configured webhook secret in Clerk.
+  - Check clock drift and timestamp tolerances if signatures are rejected.
+
+14. Operations and deployment notes
+
+- Run `npm run build` as part of CI/CD. The build runs `prisma generate` before the Next build to ensure the Prisma Client is available.
+- For production, run `npx prisma migrate deploy` to apply migrations against the production database.
+- Keep backups of the production database before running migrations that change or drop data structures.
+
+15. Files with further documentation
+
+- `README.md` - Project overview and quickstart
+- `DOCUMENTATION.md` - Longer form docs and troubleshooting (already included in the repository)
+- `DEPLOYMENT.md` - Deployment checklist and environment variables
+- `REGISTRATION_PRODUCTION.md` and `REGISTRATION_PRODUCTION_FIX.md` - Notes about registration form behavior in production
+
+16. Contribution and contact
+
+- Contribution: Fork the repository, create feature branches, open PRs and describe changes with clear migration steps if schema changes are present.
+- Contact / maintainers: See repository settings or Owner: Pravat006. For questions about deployment or secrets, coordinate with the person or team managing the production account (Clerk/Resend/Vercel/Postgres).
+
+
+17. Appendix: Useful commands
+
+- Install dependencies:
+  npm install
+
+- Generate Prisma client:
+  npx prisma generate
+
+- Run development server:
+  npm run dev
+
+- Build for production:
+  npm run build
+
+- Start production bundle:
+  npm run start
+
+- Run database migrations (dev):
+  npx prisma migrate dev
+
+- Apply migrations (production):
+  npx prisma migrate deploy
+
+Completion note: This file is a generated, consolidated plain-text documentation summary built from the project's package.json, Prisma schema, and repository docs. It intentionally does not change source code.

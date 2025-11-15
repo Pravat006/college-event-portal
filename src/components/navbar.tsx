@@ -7,6 +7,7 @@ import NotificationDropdown from "@/components/notification-dropdown";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { ThemeToggleButton } from "./theme-toggle-btn";
 
 interface NavbarProps {
     user?: {
@@ -17,7 +18,6 @@ interface NavbarProps {
     } | null;
 }
 
-// Define navigation items - matching the sidebar structure
 const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['USER', 'ADMIN'] },
     { name: 'Events', href: '/events', icon: Calendar, roles: ['USER', 'ADMIN'] },
@@ -33,28 +33,30 @@ export default function Navbar({ user }: NavbarProps) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const pathname = usePathname();
 
-    // Filter navigation based on user role
+
     const filteredNavigation = isAuthenticated
         ? navigation.filter(item => item.roles.includes(user!.role as 'USER' | 'ADMIN'))
         : [];
 
     return (
-        <nav className="fixed top-0 w-full bg-white border-b border-gray-200 z-50">
+        <nav className="fixed border-border top-0 w-full bg-background  border  z-50">
             <div className="px-3 sm:px-4 md:px-6">
                 <div className="flex justify-between items-center h-16">
                     <div className="flex items-center space-x-2 sm:space-x-3">
-                        <Calendar className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-blue-600" />
-                        <h1 className="text-lg sm:text-xl font-bold text-gray-900">College Events</h1>
+                        <Link href={"/"}>
+                            <h1 className="text-lg sm:text-4xl font-bold font-mono ">KIST</h1>
+                        </Link>
                     </div>
 
                     {/* Desktop menu */}
                     <div className="hidden md:flex items-center space-x-4">
+                        <ThemeToggleButton />
                         {isAuthenticated && <NotificationDropdown />}
 
                         {isAuthenticated ? (
                             <div className="flex items-center space-x-3">
                                 <div className="text-right hidden sm:block">
-                                    <p className="text-sm font-medium text-gray-900">
+                                    <p className="text-sm font-medium ">
                                         {user.firstName} {user.lastName}
                                     </p>
                                     <p className="text-xs text-gray-500 capitalize">
@@ -83,6 +85,7 @@ export default function Navbar({ user }: NavbarProps) {
 
                     {/* Mobile menu button */}
                     <div className="md:hidden flex items-center">
+                        <ThemeToggleButton />
                         {isAuthenticated && <NotificationDropdown />}
 
                         <button

@@ -4,28 +4,22 @@ import { headers } from 'next/headers'
 import { prisma } from '@/lib/prisma'
 
 const webhookSecret = process.env.CLERK_WEBHOOK_SECRET
-
 export async function POST(req: NextRequest) {
     if (!webhookSecret) {
         throw new Error('Please add CLERK_WEBHOOK_SECRET to your environment variables')
     }
-
     const headerPayload = await headers()
     const svix_id = headerPayload.get('svix-id')
     const svix_timestamp = headerPayload.get('svix-timestamp')
     const svix_signature = headerPayload.get('svix-signature')
-
     if (!svix_id || !svix_timestamp || !svix_signature) {
         return new Response('Error occured -- no svix headers', {
             status: 400
         })
     }
-
     const payload = await req.json()
     const body = JSON.stringify(payload)
-
     const wh = new Webhook(webhookSecret)
-
     let evt: {
         data: {
             id: string;
@@ -36,7 +30,6 @@ export async function POST(req: NextRequest) {
         };
         type: string;
     }
-
     try {
         evt = wh.verify(body, {
             'svix-id': svix_id,
@@ -49,10 +42,7 @@ export async function POST(req: NextRequest) {
             status: 400
         })
     }
-
-    // Extract the event type
     const eventType = evt.type
-
     if (eventType === 'user.created') {
         try {
             await prisma.user.create({
@@ -69,7 +59,6 @@ export async function POST(req: NextRequest) {
             return new Response('Error creating user', { status: 500 })
         }
     }
-
     if (eventType === 'user.updated') {
         try {
             await prisma.user.update({
@@ -85,7 +74,6 @@ export async function POST(req: NextRequest) {
             console.error('Error updating user:', error)
         }
     }
-
     if (eventType === 'user.deleted') {
         try {
             await prisma.user.delete({
@@ -95,6 +83,5 @@ export async function POST(req: NextRequest) {
             console.error('Error deleting user:', error)
         }
     }
-
     return NextResponse.json({ received: true })
 }

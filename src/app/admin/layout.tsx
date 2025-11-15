@@ -1,29 +1,28 @@
+import Navbar from "@/components/navbar";
+import Sidebar from "@/components/sidebar";
 import { requireAdmin } from "@/lib/auth";
-import { notFound } from "next/navigation";
-import { ClerkProvider } from "@clerk/nextjs";
+import { redirect } from "next/navigation";
 
 export default async function AdminLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
-    let user;
     try {
-        // This ensures only admins can access any admin page
-        user = await requireAdmin();
+        const user = await requireAdmin();
+
+        return (
+            <div className="min-h-screen bg-background">
+                <Navbar user={user} />
+                <div className="flex">
+                    <Sidebar user={user} />
+                    <main className="flex-1 lg:ml-64 pt-16">
+                        <div className="p-4 sm:p-6 md:p-8">{children}</div>
+                    </main>
+                </div>
+            </div>
+        );
     } catch {
-        // For extra security, return 404 instead of redirect to hide admin routes
-        notFound();
+        redirect("/");
     }
-
-    // Double check the role as extra security
-    if (user.role !== 'ADMIN') {
-        notFound();
-    }
-
-    return (
-        <ClerkProvider>
-            {children}
-        </ClerkProvider>
-    );
 }

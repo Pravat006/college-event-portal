@@ -21,15 +21,11 @@ export async function requireAuth() {
 }
 
 export async function requireAdmin() {
-    // console.log('requireAdmin: Starting admin check...')
+
     const user = await requireAuth();
-    // console.log('requireAdmin: User found:', { id: user.id, role: user.role, email: user.email })
 
     if (user.role !== 'ADMIN') {
-        // console.log('requireAdmin: ACCESS DENIED - User role is not ADMIN:', user.role)
         throw new Error("Forbidden: Admin access required");
     }
-
-    // console.log('requireAdmin: ACCESS GRANTED - User is admin')
     return user;
 }

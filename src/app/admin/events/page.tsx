@@ -1,13 +1,25 @@
 import { requireAdmin } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import Navbar from "@/components/navbar";
-import Sidebar from "@/components/sidebar";
-import DeleteEventButton from "@/components/delete-event-button";
+import DeleteEventButton from "@/components/event/delete-event-button";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
+import { Plus, Calendar, Users } from "lucide-react";
+import CreateEventDialog from "@/components/event/create-event-form";
 
 export default async function AdminEventsPage() {
     try {
-        const user = await requireAdmin();
+        await requireAdmin();
 
         const events = await prisma.event.findMany({
             include: {
@@ -16,57 +28,107 @@ export default async function AdminEventsPage() {
             orderBy: { createdAt: 'desc' }
         });
 
-        return (
-            <div className="min-h-screen bg-gray-50">
-                <Navbar user={user} />
-                <div className="flex">
-                    <Sidebar user={user} />
-                    <main className="flex-1 lg:ml-64 pt-16">
-                        <div className="p-4 sm:p-6 md:p-8">
-                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-6">
-                                <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Event Management</h1>
-                                <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 w-full sm:w-auto">
-                                    Create New Event
-                                </button>
-                            </div>
+        const getStatusBadge = (status: string) => {
+            const variants = {
+                PUBLISHED: 'default',
+                DRAFT: 'secondary',
+                CANCELLED: 'destructive',
+                COMPLETED: 'outline'
+            } as const;
 
-                            <div className="bg-white rounded-lg shadow-sm overflow-x-auto">
-                                <table className="min-w-full divide-y divide-gray-200">
-                                    <thead className="bg-gray-50">
-                                        <tr>
-                                            <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event Name</th>
-                                            <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                            <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Registrations</th>
-                                            <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                            <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="bg-white divide-y divide-gray-200">
-                                        {events.map(event => (
-                                            <tr key={event.id}>
-                                                <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{event.title}</td>
-                                                <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(event.startDate).toLocaleDateString()}</td>
-                                                <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500">{event._count.registrations}</td>
-                                                <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
-                                                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span>
-                                                </td>
-                                                <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                    <a href={`/admin/events/${event.id}`} className="text-blue-600 hover:text-blue-900 mr-3">Edit</a>
-                                                    <DeleteEventButton eventId={event.id} eventTitle={event.title} />
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                                {events.length === 0 && (
-                                    <div className="text-center py-12">
-                                        <p className="text-gray-500">No events found. Create your first event to get started.</p>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </main>
+            return variants[status as keyof typeof variants] || 'default';
+        };
+
+        return (
+            <div className="container mx-auto py-6 space-y-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Event Management</h1>
+                        <p className="text-muted-foreground mt-1">Manage and monitor all your events</p>
+                    </div>
+                    <CreateEventDialog />
                 </div>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>All Events</CardTitle>
+                        <CardDescription>
+                            {events.length} {events.length === 1 ? 'event' : 'events'} total
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        {events.length === 0 ? (
+                            <div className="text-center py-12">
+                                <Calendar className="mx-auto h-12 w-12 text-muted-foreground/50" />
+                                <h3 className="mt-4 text-lg font-semibold">No events found</h3>
+                                <p className="text-muted-foreground mt-2">
+                                    Create your first event to get started.
+                                </p>
+                                <CreateEventDialog />
+                            </div>
+                        ) : (
+                            <div className="rounded-md border">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Event Name</TableHead>
+                                            <TableHead>Date</TableHead>
+                                            <TableHead>Registrations</TableHead>
+                                            <TableHead>Status</TableHead>
+                                            <TableHead className="text-right">Actions</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {events.map(event => (
+                                            <TableRow key={event.id}>
+                                                <TableCell className="font-medium">
+                                                    {event.title}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="flex items-center gap-2 text-muted-foreground">
+                                                        <Calendar className="h-4 w-4" />
+                                                        {new Date(event.startDate).toLocaleDateString('en-US', {
+                                                            month: 'short',
+                                                            day: 'numeric',
+                                                            year: 'numeric'
+                                                        })}
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="flex items-center gap-2">
+                                                        <Users className="h-4 w-4 text-muted-foreground" />
+                                                        <span>{event._count.registrations}</span>
+                                                        <span className="text-muted-foreground">
+                                                            / {event.capacity}
+                                                        </span>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Badge variant={getStatusBadge(event.status)}>
+                                                        {event.status}
+                                                    </Badge>
+                                                </TableCell>
+                                                <TableCell className="text-right">
+                                                    <div className="flex justify-end gap-2">
+                                                        <Button asChild variant="ghost" size="sm">
+                                                            <Link href={`/admin/events/${event.id}/manage`}>
+                                                                Manage
+                                                            </Link>
+                                                        </Button>
+                                                        <DeleteEventButton
+                                                            eventId={event.id}
+                                                            eventTitle={event.title}
+                                                        />
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
             </div>
         );
     } catch {

@@ -17,12 +17,9 @@ export async function POST(req: NextRequest) {
                 status: 'PUBLISHED'
             }
         })
-
-        // Create email for all users
         const users = await prisma.user.findMany({
             where: { role: 'USER' }
         })
-
         if (users.length > 0) {
             await prisma.notification.createMany({
                 data: users.map((u: { id: string }) => ({
@@ -34,7 +31,6 @@ export async function POST(req: NextRequest) {
                 }))
             })
         }
-
         return NextResponse.json(event)
     } catch {
         return NextResponse.json(
@@ -43,12 +39,10 @@ export async function POST(req: NextRequest) {
         )
     }
 }
-
 export async function PUT(req: NextRequest) {
     try {
         await requireAdmin()
         const { id, ...data } = await req.json()
-
         const event = await prisma.event.update({
             where: { id },
             data: {
@@ -79,11 +73,9 @@ export async function PUT(req: NextRequest) {
                 },
                 user: registration.user,
                 updateType: 'updated'
-            }).catch(() => null) // Silently catch errors
+            }).catch(() => null)
         )
-
         await Promise.all(emailPromises)
-
         return NextResponse.json(event)
     } catch {
         return NextResponse.json(

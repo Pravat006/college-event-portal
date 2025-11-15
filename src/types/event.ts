@@ -14,3 +14,23 @@ export interface EventEmail {
         email: string
     }
 }
+export type TopEvent = {
+    id: string;
+    title: string;
+    startDate: Date;
+    _count: {
+        registrations: number;
+    };
+};
+export type WinnerPosition = 'FIRST' | 'SECOND' | 'THIRD' | 'PARTICIPATION'
+
+export interface CertificateData {
+    userName: string
+    eventTitle: string
+    position: WinnerPosition
+    eventDate: string
+    organizerName: string
+    collegeName?: string
+    registrationNumber?: string
+    semester?: number
+}

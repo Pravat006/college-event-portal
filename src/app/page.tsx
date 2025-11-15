@@ -1,13 +1,12 @@
 import Link from 'next/link'
-import { auth } from '@clerk/nextjs/server'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Calendar, Users, Star, Bell, MapPin, Clock, DollarSign } from 'lucide-react'
-import { prisma } from '@/lib/prisma'
-import { format } from 'date-fns'
-import EventRegistrationButton from '@/components/event-registration-button'
+import { Calendar, Users, Star, Bell, Trophy, Sparkles, TrendingUp } from 'lucide-react'
 import Image from 'next/image'
+
+import HeroSection from '@/components/landing/hero-section'
+import { getCurrentUser } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
 
 async function getUpcomingEvents() {
   return await prisma.event.findMany({
@@ -17,290 +16,358 @@ async function getUpcomingEvents() {
     },
     include: {
       createdBy: { select: { firstName: true, lastName: true } },
-      registrations: { include: { user: { select: { id: true } } } },
-      _count: { select: { registrations: true, feedback: true } }
+      _count: { select: { registrations: true } }
     },
     orderBy: { startDate: 'asc' },
+    take: 3
+  })
+}
+
+async function getRecentWinners() {
+  return await prisma.winner.findMany({
+    include: {
+      user: { select: { firstName: true, lastName: true } },
+      event: { select: { title: true, category: true } }
+    },
+    orderBy: { createdAt: 'desc' },
     take: 6
   })
 }
 
-async function getCurrentUser() {
-  const { userId } = await auth()
-  if (!userId) return null
-  return await prisma.user.findUnique({
-    where: { clerkId: userId }
-  })
-}
-
 export default async function HomePage() {
-  const [events, user] = await Promise.all([
+  const [user, events, winners] = await Promise.all([
+    getCurrentUser(),
     getUpcomingEvents(),
-    getCurrentUser()
+    getRecentWinners()
   ])
 
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
-      ACADEMIC: 'bg-blue-100 text-blue-800',
-      CULTURAL: 'bg-purple-100 text-purple-800',
-      SPORTS: 'bg-green-100 text-green-800',
-      TECHNICAL: 'bg-orange-100 text-orange-800',
-      SOCIAL: 'bg-pink-100 text-pink-800',
-      WORKSHOP: 'bg-yellow-100 text-yellow-800'
+      ACADEMIC: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+      CULTURAL: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
+      SPORTS: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+      TECHNICAL: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
+      SOCIAL: 'bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300',
+      WORKSHOP: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
     }
     return colors[category] || 'bg-gray-100 text-gray-800'
   }
 
+  const formatDate = (date: Date) => {
+    return new Date(date).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    })
+  }
+
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur border-b sticky top-0 z-40">
-        <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-7 w-7 text-blue-600 sm:h-8 sm:w-8" />
-              <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">
-                College Events
-              </h1>
-            </div>
-            <div className="flex items-center gap-3">
-              {user ? (
-                <>
-                  <span className="hidden sm:inline text-sm text-gray-600 truncate max-w-[140px]">
-                    Welcome, {user.firstName}!
-                  </span>
-                  <Link href="/dashboard">
-                    <Button size="sm" className="sm:size-default">Dashboard</Button>
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <Link href="/sign-in">
-                    <Button variant="ghost" size="sm" className="sm:size-default">Sign In</Button>
-                  </Link>
-                  <Link href="/sign-up">
-                    <Button size="sm" className="sm:size-default">Get Started</Button>
-                  </Link>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen flex flex-col bg-background">
+      <HeroSection />
 
-      {/* Hero */}
-      <section className="py-14 sm:py-20 px-4">
-        <div className="mx-auto max-w-4xl text-center">
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900 mb-6 leading-tight">
-            Discover & Join
-            <span className="text-blue-600 block mt-1">Amazing College Events</span>
-          </h2>
-          <p className="text-base sm:text-lg lg:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Stay connected with your campus community. Discover exciting events, workshops, and activities happening around you.
-          </p>
-          {!user && (
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-              <Link href="/sign-up">
-                <Button size="lg" className="w-full sm:w-auto">
-                  Join as Student
-                </Button>
-              </Link>
-              <Link href="/sign-up">
-                <Button size="lg" variant="outline" className="w-full sm:w-auto">
-                  Apply as Admin
-                </Button>
-              </Link>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Upcoming Events */}
-      <section className="py-12 sm:py-16 px-4 bg-white">
-        <div className="mx-auto w-full max-w-7xl">
-          <div className="text-center mb-10 sm:mb-12 px-2">
-            <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">
-              Upcoming Events
-            </h3>
-            <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto">
-              Don&apos;t miss out on these exciting events happening on campus. Register now to secure your spot!
+      {/* About Section - Timeline Animation */}
+      <section id="next-section" className="py-20 px-4 bg-background">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
+              How It <span className="text-[#87e64b]">Works</span>
+            </h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+              Your journey from discovery to celebration in four simple steps
             </p>
           </div>
 
-          {events.length === 0 ? (
-            <div className="text-center py-14 sm:py-20">
-              <Calendar className="mx-auto h-14 w-14 sm:h-16 sm:w-16 text-gray-300 mb-4" />
-              <h4 className="text-lg sm:text-xl font-medium text-gray-900 mb-2">No upcoming events</h4>
-              <p className="text-gray-500 text-sm sm:text-base">Check back soon for new events.</p>
+          {/* Timeline */}
+          <div className="relative">
+            {/* Vertical line */}
+            <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-gradient-to-b from-[#87e64b]/20 via-[#87e64b]/50 to-[#87e64b]/20 hidden md:block" />
+
+            <div className="space-y-16 md:space-y-24">
+              {/* Step 1 */}
+              <div className="relative flex flex-col md:flex-row items-center gap-8 group">
+                <div className="md:w-1/2 md:text-right md:pr-12 animate-fade-in-left">
+                  <div className="inline-block mb-2 px-4 py-1 rounded-full bg-[#87e64b]/10 text-[#87e64b] text-sm font-semibold">
+                    Step 1
+                  </div>
+                  <h3 className="text-2xl font-bold mb-3">Discover Events</h3>
+                  <p className="text-muted-foreground">
+                    Browse through a diverse range of cultural, technical, and sports events tailored to your interests.
+                  </p>
+                </div>
+                <div className="absolute left-1/2 transform -translate-x-1/2 w-16 h-16 rounded-full bg-[#87e64b] flex items-center justify-center text-white font-bold text-xl shadow-lg hidden md:flex group-hover:scale-110 transition-transform">
+                  1
+                </div>
+                <div className="md:w-1/2 md:pl-12 animate-fade-in-right">
+                  <div className="bg-gradient-to-br from-[#87e64b]/10 to-transparent p-6 rounded-2xl border border-[#87e64b]/20">
+                    <Calendar className="w-12 h-12 text-[#87e64b] mb-4" />
+                    <p className="text-sm text-muted-foreground">
+                      Smart filters help you find exactly what you're looking for
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 2 */}
+              <div className="relative flex flex-col md:flex-row-reverse items-center gap-8 group">
+                <div className="md:w-1/2 md:text-left md:pl-12 animate-fade-in-right">
+                  <div className="inline-block mb-2 px-4 py-1 rounded-full bg-[#87e64b]/10 text-[#87e64b] text-sm font-semibold">
+                    Step 2
+                  </div>
+                  <h3 className="text-2xl font-bold mb-3">Register Instantly</h3>
+                  <p className="text-muted-foreground">
+                    Quick and seamless registration process with instant email confirmation.
+                  </p>
+                </div>
+                <div className="absolute left-1/2 transform -translate-x-1/2 w-16 h-16 rounded-full bg-[#87e64b] flex items-center justify-center text-white font-bold text-xl shadow-lg hidden md:flex group-hover:scale-110 transition-transform">
+                  2
+                </div>
+                <div className="md:w-1/2 md:pr-12 animate-fade-in-left">
+                  <div className="bg-gradient-to-bl from-[#87e64b]/10 to-transparent p-6 rounded-2xl border border-[#87e64b]/20">
+                    <Users className="w-12 h-12 text-[#87e64b] mb-4" />
+                    <p className="text-sm text-muted-foreground">
+                      Secure your spot in seconds with our streamlined process
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 3 */}
+              <div className="relative flex flex-col md:flex-row items-center gap-8 group">
+                <div className="md:w-1/2 md:text-right md:pr-12 animate-fade-in-left">
+                  <div className="inline-block mb-2 px-4 py-1 rounded-full bg-[#87e64b]/10 text-[#87e64b] text-sm font-semibold">
+                    Step 3
+                  </div>
+                  <h3 className="text-2xl font-bold mb-3">Stay Informed</h3>
+                  <p className="text-muted-foreground">
+                    Get real-time notifications and updates about your registered events.
+                  </p>
+                </div>
+                <div className="absolute left-1/2 transform -translate-x-1/2 w-16 h-16 rounded-full bg-[#87e64b] flex items-center justify-center text-white font-bold text-xl shadow-lg hidden md:flex group-hover:scale-110 transition-transform">
+                  3
+                </div>
+                <div className="md:w-1/2 md:pl-12 animate-fade-in-right">
+                  <div className="bg-gradient-to-br from-[#87e64b]/10 to-transparent p-6 rounded-2xl border border-[#87e64b]/20">
+                    <Bell className="w-12 h-12 text-[#87e64b] mb-4" />
+                    <p className="text-sm text-muted-foreground">
+                      Never miss important updates or schedule changes
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 4 */}
+              <div className="relative flex flex-col md:flex-row-reverse items-center gap-8 group">
+                <div className="md:w-1/2 md:text-left md:pl-12 animate-fade-in-right">
+                  <div className="inline-block mb-2 px-4 py-1 rounded-full bg-[#87e64b]/10 text-[#87e64b] text-sm font-semibold">
+                    Step 4
+                  </div>
+                  <h3 className="text-2xl font-bold mb-3">Celebrate & Share</h3>
+                  <p className="text-muted-foreground">
+                    Participate, win, and share your experiences with the community.
+                  </p>
+                </div>
+                <div className="absolute left-1/2 transform -translate-x-1/2 w-16 h-16 rounded-full bg-[#87e64b] flex items-center justify-center text-white font-bold text-xl shadow-lg hidden md:flex group-hover:scale-110 transition-transform">
+                  4
+                </div>
+                <div className="md:w-1/2 md:pr-12 animate-fade-in-left">
+                  <div className="bg-gradient-to-bl from-[#87e64b]/10 to-transparent p-6 rounded-2xl border border-[#87e64b]/20">
+                    <Star className="w-12 h-12 text-[#87e64b] mb-4" />
+                    <p className="text-sm text-muted-foreground">
+                      Leave feedback and help others make informed decisions
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
-          ) : (
-            <div className="grid gap-6 sm:gap-8 xs:grid-cols-2 md:grid-cols-2 lg:grid-cols-3">
-              {events.map(event => {
-                const isUserRegistered = user
-                  ? event.registrations.some(reg => reg.user.id === user.id)
-                  : false
-                const isFull = event._count.registrations >= event.capacity
-
-                return (
-                  <Card
-                    key={event.id}
-                    className="flex flex-col hover:shadow-lg hover:shadow-blue-100 transition-all duration-300"
-                  >
-                    {event.imageUrl && (
-                      <div className="aspect-video bg-gray-100 rounded-t-lg overflow-hidden">
-                        <Image
-                          src={event.imageUrl}
-                          alt={event.title}
-                          width={640}
-                          height={360}
-                          className="h-full w-full object-cover"
-                          sizes="(max-width: 640px) 100vw, 33vw"
-                          priority={false}
-                        />
-                      </div>
-                    )}
-
-                    <CardHeader className="pb-4">
-                      <div className="flex justify-between items-start gap-3 mb-2">
-                        <CardTitle className="line-clamp-2 text-base sm:text-lg">
-                          {event.title}
-                        </CardTitle>
-                        <Badge className={`shrink-0 ${getCategoryColor(event.category)}`}>
-                          {event.category}
-                        </Badge>
-                      </div>
-                      <CardDescription className="line-clamp-3 text-sm leading-relaxed">
-                        {event.description}
-                      </CardDescription>
-                    </CardHeader>
-
-                    <CardContent className="space-y-4 flex-1 flex flex-col">
-                      <div className="space-y-3 text-sm">
-                        <div className="flex items-center text-gray-600">
-                          <Calendar className="h-4 w-4 mr-2 text-blue-600" />
-                          <span className="font-medium truncate">
-                            {format(new Date(event.startDate), 'EEE, MMM dd, yyyy')}
-                          </span>
-                        </div>
-                        <div className="flex items-center text-gray-600">
-                          <Clock className="h-4 w-4 mr-2 text-green-600" />
-                          <span className="truncate">
-                            {format(new Date(event.startDate), 'h:mm a')} – {format(new Date(event.endDate), 'h:mm a')}
-                          </span>
-                        </div>
-                        <div className="flex items-center text-gray-600">
-                          <MapPin className="h-4 w-4 mr-2 text-red-600" />
-                          <span className="truncate">{event.location}</span>
-                        </div>
-                        <div className="flex items-center justify-between gap-4">
-                          <div className="flex items-center text-gray-600">
-                            <Users className="h-4 w-4 mr-2 text-purple-600" />
-                            <span>
-                              {event._count.registrations} / {event.capacity}
-                            </span>
-                          </div>
-                          {event.price || 0 > 0 && (
-                            <div className="flex items-center text-green-600 font-semibold">
-                              <DollarSign className="h-4 w-4 mr-1" />
-                              <span className="text-sm">{event.price}</span>
-                            </div>
-                          )}
-                        </div>
-                        {event._count.feedback > 0 && (
-                          <div className="flex items-center text-gray-600">
-                            <Star className="h-4 w-4 mr-2 text-yellow-600" />
-                            <span>{event._count.feedback} reviews</span>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="pt-4 mt-auto border-t">
-                        <div className="flex justify-between items-center mb-3">
-                          <span className="text-xs text-gray-500 truncate">
-                            by {event.createdBy.firstName} {event.createdBy.lastName}
-                          </span>
-                        </div>
-                        <EventRegistrationButton
-                          event={event}
-                          user={user}
-                          isRegistered={isUserRegistered}
-                          isFull={isFull}
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
-                )
-              })}
-            </div>
-          )}
-
-          {events.length > 0 && (
-            <div className="text-center mt-10 sm:mt-14">
-              {user ? (
-                <Link href="/events">
-                  <Button size="lg" variant="outline" className="w-full sm:w-auto">
-                    View All Events
-                  </Button>
-                </Link>
-              ) : (
-                <Link href="/sign-up">
-                  <Button size="lg" className="w-full sm:w-auto">
-                    Sign Up to See More Events
-                  </Button>
-                </Link>
-              )}
-            </div>
-          )}
+          </div>
         </div>
       </section>
 
-      {/* Features */}
-      <section className="py-14 sm:py-20 px-4 bg-gray-50">
+      {/* Upcoming Events Section */}
+      <section className="py-20 px-4 bg-muted/30">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full bg-[#87e64b]/10 text-[#87e64b]">
+              <Sparkles className="w-4 h-4" />
+              <span className="text-sm font-semibold">Happening Soon</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
+              Upcoming <span className="text-[#87e64b]">Events</span>
+            </h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+              Don't miss out on these exciting opportunities
+            </p>
+          </div>
+
+          {events.length > 0 ? (
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 mb-8">
+              {events.map((event) => (
+                <Card key={event.id} className="group hover:shadow-xl transition-all duration-300 overflow-hidden">
+                  <div className="relative h-48 bg-gradient-to-br from-[#87e64b]/20 to-[#87e64b]/5">
+                    {event.imageUrl && (
+                      <Image
+                        src={event.imageUrl}
+                        alt={event.title}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    )}
+                    <div className="absolute top-4 right-4">
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getCategoryColor(event.category)}`}>
+                        {event.category}
+                      </span>
+                    </div>
+                  </div>
+                  <CardHeader>
+                    <CardTitle className="line-clamp-1">{event.title}</CardTitle>
+                    <CardDescription className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4" />
+                      {formatDate(event.startDate)}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Users className="w-4 h-4" />
+                        <span>{event._count.registrations} registered</span>
+                      </div>
+                    </div>
+                    <Link href={`/browse-events/event/${event.id}`}>
+                      <Button className="w-full group-hover:bg-[#87e64b] group-hover:text-white transition-colors">
+                        View Details
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No upcoming events at the moment. Check back soon!</p>
+            </div>
+          )}
+
+          <div className="text-center">
+            <Link href="/browse-events">
+              <Button size="lg" variant="outline" className="group">
+                View All Events
+                <TrendingUp className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Winners Section */}
+      {winners.length > 0 && (
+        <section className="py-20 px-4 bg-background">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full bg-[#87e64b]/10 text-[#87e64b]">
+                <Trophy className="w-4 h-4" />
+                <span className="text-sm font-semibold">Hall of Fame</span>
+              </div>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
+                Recent <span className="text-[#87e64b]">Winners</span>
+              </h2>
+              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+                Celebrating excellence and achievement
+              </p>
+            </div>
+
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {winners.map((winner) => (
+                <Card key={winner.id} className="group hover:shadow-lg transition-all duration-300 border-2 hover:border-[#87e64b]/50">
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <CardTitle className="text-lg mb-2 flex items-center gap-2">
+                          {Number(winner.position) === 1 && <Trophy className="w-5 h-5 text-yellow-500" />}
+                          {Number(winner.position) === 2 && <Trophy className="w-5 h-5 text-gray-400" />}
+                          {Number(winner.position) === 3 && <Trophy className="w-5 h-5 text-amber-600" />}
+                          {winner.user.firstName} {winner.user.lastName}
+                        </CardTitle>
+                        <CardDescription className="text-sm">
+                          {winner.event.title}
+                        </CardDescription>
+                      </div>
+                      <div className="text-3xl font-bold text-[#87e64b]">
+                        #{winner.position}
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getCategoryColor(winner.event.category)}`}>
+                      {winner.event.category}
+                    </span>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Features Section */}
+      <section className="py-20 px-4 bg-muted/30">
         <div className="mx-auto max-w-6xl">
-          <h3 className="text-2xl sm:text-3xl font-bold text-center text-gray-900 mb-10 sm:mb-12">
-            Why Join Our Platform?
-          </h3>
-          <div className="grid gap-6 sm:gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            <Card className="text-center hover:shadow-md transition-shadow">
+          <div className="text-center mb-12">
+            <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
+              Why Choose <span className="text-[#87e64b]">Us</span>?
+            </h3>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+              Everything you need to manage and participate in college events
+            </p>
+          </div>
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            <Card className="text-center hover:shadow-xl transition-all duration-300 border-2 hover:border-[#87e64b]/50 group">
               <CardHeader>
-                <Calendar className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-                <CardTitle className="text-base sm:text-lg">Easy Discovery</CardTitle>
+                <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-[#87e64b]/10 flex items-center justify-center group-hover:bg-[#87e64b]/20 transition-colors">
+                  <Calendar className="h-8 w-8 text-[#87e64b]" />
+                </div>
+                <CardTitle className="text-lg">Easy Discovery</CardTitle>
               </CardHeader>
               <CardContent>
-                <CardDescription className="text-sm">
+                <CardDescription>
                   Find events matching your interests with powerful browsing & filtering.
                 </CardDescription>
               </CardContent>
             </Card>
-            <Card className="text-center hover:shadow-md transition-shadow">
+            <Card className="text-center hover:shadow-xl transition-all duration-300 border-2 hover:border-[#87e64b]/50 group">
               <CardHeader>
-                <Users className="h-12 w-12 text-green-600 mx-auto mb-4" />
-                <CardTitle className="text-base sm:text-lg">Quick Registration</CardTitle>
+                <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-[#87e64b]/10 flex items-center justify-center group-hover:bg-[#87e64b]/20 transition-colors">
+                  <Users className="h-8 w-8 text-[#87e64b]" />
+                </div>
+                <CardTitle className="text-lg">Quick Registration</CardTitle>
               </CardHeader>
               <CardContent>
-                <CardDescription className="text-sm">
+                <CardDescription>
                   Register instantly and receive immediate confirmation.
                 </CardDescription>
               </CardContent>
             </Card>
-            <Card className="text-center hover:shadow-md transition-shadow">
+            <Card className="text-center hover:shadow-xl transition-all duration-300 border-2 hover:border-[#87e64b]/50 group">
               <CardHeader>
-                <Star className="h-12 w-12 text-orange-600 mx-auto mb-4" />
-                <CardTitle className="text-base sm:text-lg">Community Feedback</CardTitle>
+                <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-[#87e64b]/10 flex items-center justify-center group-hover:bg-[#87e64b]/20 transition-colors">
+                  <Star className="h-8 w-8 text-[#87e64b]" />
+                </div>
+                <CardTitle className="text-lg">Community Feedback</CardTitle>
               </CardHeader>
               <CardContent>
-                <CardDescription className="text-sm">
+                <CardDescription>
                   Share experiences and read peer reviews to choose wisely.
                 </CardDescription>
               </CardContent>
             </Card>
-            <Card className="text-center hover:shadow-md transition-shadow">
+            <Card className="text-center hover:shadow-xl transition-all duration-300 border-2 hover:border-[#87e64b]/50 group">
               <CardHeader>
-                <Bell className="h-12 w-12 text-purple-600 mx-auto mb-4" />
-                <CardTitle className="text-base sm:text-lg">Stay Updated</CardTitle>
+                <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-[#87e64b]/10 flex items-center justify-center group-hover:bg-[#87e64b]/20 transition-colors">
+                  <Bell className="h-8 w-8 text-[#87e64b]" />
+                </div>
+                <CardTitle className="text-lg">Stay Updated</CardTitle>
               </CardHeader>
               <CardContent>
-                <CardDescription className="text-sm">
+                <CardDescription>
                   Get real-time notifications about updates & reminders.
                 </CardDescription>
               </CardContent>
@@ -311,16 +378,16 @@ export default async function HomePage() {
 
       {/* CTA */}
       {!user && (
-        <section className="py-16 sm:py-20 px-4 bg-blue-600 text-white">
+        <section className="py-20 px-4 bg-gradient-to-br from-[#87e64b] to-[#6bc93a] text-white">
           <div className="max-w-3xl mx-auto text-center">
-            <h3 className="text-2xl sm:text-3xl font-bold mb-5">
+            <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6">
               Ready to Get Started?
             </h3>
-            <p className="text-base sm:text-lg mb-8 text-blue-100">
+            <p className="text-lg sm:text-xl mb-8 text-white/90">
               Join thousands of students already discovering amazing events.
             </p>
             <Link href="/sign-up">
-              <Button size="lg" variant="secondary" className="w-full sm:w-auto">
+              <Button size="lg" variant="secondary" className="text-lg px-8 py-6 hover:scale-105 transition-transform">
                 Create Your Account
               </Button>
             </Link>
@@ -330,8 +397,8 @@ export default async function HomePage() {
 
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-8 px-4 mt-auto">
-        <div className="max-w-6xl mx-auto text-center text-sm sm:text-base">
-          <p>&copy; 2025 College Event Portal. All rights reserved.</p>
+        <div className="max-w-6xl mx-auto text-center">
+          <p className="text-sm sm:text-base">&copy; 2025 College Event Portal. All rights reserved.</p>
         </div>
       </footer>
     </div>
