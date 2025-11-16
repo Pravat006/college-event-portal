@@ -1,128 +1,114 @@
-export interface User {
-    id: string
-    clerkId: string
-    email: string
-    firstName: string
-    lastName: string
-    imageUrl?: string
-    role: 'USER' | 'ADMIN'
-    createdAt: Date
-    updatedAt: Date
-    notifications?: Notification[]
-    winners?: Winner[]
-    eventsCreated?: Event[]
-    declaredWinners?: Winner[]
-    _count?: {
-        registrations: number
-        feedback: number
-        winners: number
-        eventsCreated: number
-    }
+import { User, EventWithRelations } from "@/lib/schemas";
+
+export interface EventRegistrationFormProps {
+    eventId: string;
+    onSuccess?: () => void;
+    status: string;
+    disable: boolean;
+    registrationStatus?: string;
 }
 
-
-export interface Winner {
-    id: string
-    userId: string
-    eventId: string
-    position: WinnerPosition
-    declaredAt: Date
-    declaredByUserId: string
-    createdAt: Date
-    updatedAt: Date
-    user?: User
-    event?: Event
-    declaredBy?: User
-    certificate?: Certificate
+export interface HeaderProps {
+    user?: {
+        firstName: string;
+        role: string;
+    } | null;
 }
 
-export interface Certificate {
-    id: string
-    winnerId: string
-    certificateUrl?: string
-    certificateData?: any // JSON data for dynamic certificates
-    issuedAt: Date
-    emailSent: boolean
-    emailSentAt?: Date
-    createdAt: Date
-    updatedAt: Date
-    winner?: Winner
-}
-// Enum Types
-export type Role = 'USER' | 'ADMIN'
-
-export type WinnerPosition =
-    | 'FIRST'
-    | 'SECOND'
-    | 'THIRD'
-    | 'PARTICIPATION'
-
-export type EventCategory =
-    | 'ACADEMIC'
-    | 'CULTURAL'
-    | 'SPORTS'
-    | 'TECHNICAL'
-    | 'SOCIAL'
-    | 'WORKSHOP'
-
-export type EventStatus =
-    | 'DRAFT'
-    | 'PUBLISHED'
-    | 'CANCELLED'
-    | 'COMPLETED'
-
-export type RegistrationStatus =
-    | 'REGISTERED'
-    | 'ATTENDED'
-    | 'CANCELLED'
-
-export type NotificationType =
-    | 'EVENT_CREATED'
-    | 'EVENT_UPDATED'
-    | 'EVENT_CANCELLED'
-    | 'REGISTRATION_CONFIRMED'
-    | 'FEEDBACK_REQUEST'
-
-// Form Types
-export interface EventFormData {
-    title: string
-    description: string
-    location: string
-    startDate: string
-    endDate: string
-    capacity: number
-    price: number
-    category: EventCategory
-    imageUrl?: string
+export interface NavbarProps {
+    user?: {
+        firstName: string;
+        lastName: string;
+        role: string;
+        imageUrl?: string | null;
+    } | null;
 }
 
-export interface WinnerFormData {
-    userId: string
-    eventId: string
-    position: WinnerPosition
+export interface EventsGridProps {
+    events: EventWithRelations[];
+    user: { id: string; role: string };
 }
 
-export interface CertificateData {
-    userName: string
-    eventTitle: string
-    position: WinnerPosition
-    eventDate: string
-    organizerName: string
-    collegeName?: string
-    registrationNumber?: string
-    semester?: number
+export interface UpcomingEventsProps {
+    events: EventWithRelations[];
 }
 
-export interface Registration {
-    id: string
-    userId: string
-    eventId: string
-    status: RegistrationStatus
-    registeredAt: Date
-    registrationNumber: string
-    fullName: string
-    semester: number
-    createdAt: Date
-    user?: User
-    event?: Event
+export interface RecentEventsProps {
+    events: EventWithRelations[];
+}
+
+export interface EventRegistrationButtonProps {
+    event: EventWithRelations;
+    user: User | null;
+    isRegistered?: boolean;
+    isFull: boolean;
+}
+
+export interface DashboardStatsProps {
+    totalEvents: number;
+    totalRegistrations: number;
+    feedbackCount: number;
+    userRole: string;
+}
+
+export interface DeleteEventButtonProps {
+    eventId: string;
+    eventTitle: string;
+}
+
+export interface UnregisterEventButtonProps {
+    eventId: string;
+    eventTitle: string;
+    onCancel: (eventId: string) => void;
+    disabled?: boolean;
+}
+
+export interface SendEventUpdateProps {
+    event: {
+        id: string;
+        title: string;
+        status: string;
+        _count: { registrations: number };
+    };
+}
+
+export type TopEvent = {
+    id: string;
+    title: string;
+    startDate: Date;
+    _count: {
+        registrations: number;
+    };
+};
+
+export interface EventChartProps {
+    events: TopEvent[];
+}
+
+export interface CertificateManagementProps {
+    eventId: string;
+    eventTitle: string;
+}
+
+export interface PageProps {
+    params: Promise<{ id: string }>;
+}
+
+export interface EventRegistrationPageItem {
+    id: string;
+    status: string;
+    registeredAt: string;
+    registrationNumber: string;
+    fullName: string;
+    semester: number;
+    event: {
+        id: string;
+        title: string;
+        description?: string;
+        imageUrl?: string;
+        startDate: string;
+        endDate: string;
+        location: string;
+        status: string;
+    };
 }

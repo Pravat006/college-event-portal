@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -8,17 +8,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Trophy, Medal, Award, Users, Search, Filter } from 'lucide-react'
+import { Trophy, Medal, Award, Search, Filter } from 'lucide-react'
 import { format } from 'date-fns'
 import toast from 'react-hot-toast'
-import type { Registration, WinnerPosition } from '@/types'
-import { RegistrationWithWinner, WinnerDeclarationProps, WinnerSelection } from '@/lib/schemas'
+import { RegistrationWithWinner, WinnerDeclarationProps, WinnerPosition, WinnerSelection } from '@/lib/schemas'
 
 const POSITION_OPTIONS = [
     { value: 'FIRST' as WinnerPosition, label: '🥇 1st Place', icon: Trophy },
     { value: 'SECOND' as WinnerPosition, label: '🥈 2nd Place', icon: Medal },
-    { value: 'THIRD' as WinnerPosition, label: '🥉 3rd Place', icon: Award },
-    { value: 'PARTICIPATION' as WinnerPosition, label: '🎖️ Participation', icon: Users }
+    { value: 'THIRD' as WinnerPosition, label: '🥉 3rd Place', icon: Award }
 ]
 
 export default function WinnerDeclaration({ eventId, eventTitle }: WinnerDeclarationProps) {
@@ -31,15 +29,7 @@ export default function WinnerDeclaration({ eventId, eventTitle }: WinnerDeclara
     const [positionFilter, setPositionFilter] = useState('all')
     const [showDialog, setShowDialog] = useState(false)
 
-    useEffect(() => {
-        fetchRegistrations()
-    }, [eventId])
-
-    useEffect(() => {
-        filterRegistrations()
-    }, [registrations, searchTerm, positionFilter])
-
-    const fetchRegistrations = async () => {
+    const fetchRegistrations = useCallback(async () => {
         try {
             const response = await fetch(`/api/admin/winners?eventId=${eventId}`)
             if (response.ok) {
@@ -48,14 +38,14 @@ export default function WinnerDeclaration({ eventId, eventTitle }: WinnerDeclara
             } else {
                 toast.error('Failed to fetch registrations')
             }
-        } catch (error) {
+        } catch {
             toast.error('Something went wrong')
         } finally {
             setLoading(false)
         }
-    }
+    }, [eventId])
 
-    const filterRegistrations = () => {
+    const filterRegistrations = useCallback(() => {
         let filtered = registrations
 
         if (searchTerm) {
@@ -75,7 +65,15 @@ export default function WinnerDeclaration({ eventId, eventTitle }: WinnerDeclara
         }
 
         setFilteredRegistrations(filtered)
-    }
+    }, [registrations, searchTerm, positionFilter])
+
+    useEffect(() => {
+        fetchRegistrations()
+    }, [fetchRegistrations])
+
+    useEffect(() => {
+        filterRegistrations()
+    }, [filterRegistrations])
 
     const handlePositionChange = (userId: string, position: string) => {
         // Remove "NONE" value to clear selection
@@ -125,7 +123,7 @@ export default function WinnerDeclaration({ eventId, eventTitle }: WinnerDeclara
                 const error = await response.json()
                 toast.error(error.message || 'Failed to declare winners')
             }
-        } catch (error) {
+        } catch {
             toast.error('Something went wrong')
         } finally {
             setDeclaring(false)
@@ -141,15 +139,13 @@ export default function WinnerDeclaration({ eventId, eventTitle }: WinnerDeclara
         const colors = {
             'FIRST': 'bg-yellow-100 text-yellow-800',
             'SECOND': 'bg-gray-100 text-gray-800',
-            'THIRD': 'bg-orange-100 text-orange-800',
-            'PARTICIPATION': 'bg-blue-100 text-blue-800'
+            'THIRD': 'bg-orange-100 text-orange-800'
         }
 
         const labels = {
             'FIRST': '🥇 1st Place',
             'SECOND': '🥈 2nd Place',
-            'THIRD': '🥉 3rd Place',
-            'PARTICIPATION': '🎖️ Participation'
+            'THIRD': '🥉 3rd Place'
         }
 
         return (
@@ -284,7 +280,7 @@ export default function WinnerDeclaration({ eventId, eventTitle }: WinnerDeclara
                                             <div className="text-sm">
                                                 <div>Reg: {registration.registrationNumber}</div>
                                                 <div className="text-gray-500">
-                                                    "KONARK INSTITUTE OF SCIENCE AND TECHNOLOGY"
+                                                    KONARK INSTITUTE OF SCIENCE AND TECHNOLOGY
                                                 </div>
                                                 <div className="text-gray-500">
                                                     Registered: {format(new Date(registration.registeredAt), 'MMM dd')}

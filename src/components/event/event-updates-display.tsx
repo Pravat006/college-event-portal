@@ -33,6 +33,7 @@ export function EventUpdatesDisplay({ eventId }: EventUpdatesDisplayProps) {
     const [loading, setLoading] = useState(true)
     const { isConnected, socket } = useEventSocket(eventId)
 
+
     useEffect(() => {
         const fetchUpdates = async () => {
             try {

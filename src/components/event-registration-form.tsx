@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Calendar, MapPin, Users, Clock, DollarSign, X } from 'lucide-react'
 import { format } from 'date-fns'
 import toast from 'react-hot-toast'
+import { EventWithRelations } from '@/lib/schemas'
 
 const registrationSchema = z.object({
     registrationNumber: z.string()
@@ -23,22 +24,8 @@ const registrationSchema = z.object({
 
 type RegistrationFormData = z.infer<typeof registrationSchema>
 
-interface Event {
-    id: string
-    title: string
-    description: string
-    imageUrl: string | null
-    location: string
-    startDate: Date
-    endDate: Date
-    capacity: number
-    price: number | null
-    category: string
-    _count: { registrations: number }
-}
-
 interface EventRegistrationFormProps {
-    event: Event
+    event: EventWithRelations
     onClose: () => void
     onSuccess: () => void
 }
@@ -163,7 +150,7 @@ export default function EventRegistrationForm({ event, onClose, onSuccess }: Eve
 
                                 <div className="flex items-center text-gray-600">
                                     <Users className="h-4 w-4 mr-2 text-purple-600" />
-                                    <span>{event._count.registrations} / {event.capacity} registered</span>
+                                    <span>{event._count?.registrations || 0} / {event.capacity} registered</span>
                                 </div>
 
                                 {event.price && event.price > 0 && (

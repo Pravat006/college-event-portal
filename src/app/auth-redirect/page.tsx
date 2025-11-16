@@ -40,9 +40,8 @@ export default function AuthRedirectPage() {
 
                 const data = await response.json();
 
-                // Redirect based on role
                 if (data.role === 'ADMIN') {
-                    router.push('/dashboard');
+                    router.push('/admin/dashboard');
                 } else {
                     router.push('/');
                 }

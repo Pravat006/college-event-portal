@@ -59,7 +59,6 @@ export async function PUT(req: NextRequest) {
             }
         })
 
-        // Send update emails to all registered users
         const emailPromises = event.registrations.map((registration: { user: { firstName: string; lastName: string; email: string } }) =>
             sendEventUpdateEmail({
                 event: {

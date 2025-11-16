@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { generateCertificateHTML, getCertificateFileName, getPositionDisplay } from '@/lib/certificate'
+import { generateCertificateHTML, getPositionDisplay } from '@/lib/certificate'
 import { sendCertificateEmail } from '@/lib/email'
 import { format } from 'date-fns'
 import { requireAdmin } from '@/lib/auth'
@@ -92,7 +92,7 @@ export async function POST(req: NextRequest) {
                             organizerName: `${event.createdBy.firstName} ${event.createdBy.lastName}`,
                             collegeName: "KONARK INSTITUTE OF SCIENCE AND TECHNOLOGY",
                             registrationNumber: registration.registrationNumber.toString(),
-                            semester: registration.semester
+                            semester: registration.semester?.toString()
                         }
                     }
                 })
@@ -106,7 +106,7 @@ export async function POST(req: NextRequest) {
                     organizerName: `${event.createdBy.firstName} ${event.createdBy.lastName}`,
                     collegeName: "KONARK INSTITUTE OF SCIENCE AND TECHNOLOGY",
                     registrationNumber: registration.registrationNumber.toString(),
-                    semester: registration.semester
+                    semester: registration.semester?.toString()
                 }
 
                 const certificateHtml = generateCertificateHTML(certificateData)

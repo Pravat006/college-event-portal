@@ -8,15 +8,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { ThemeToggleButton } from "./theme-toggle-btn";
+import { NavbarProps } from "@/types";
 
-interface NavbarProps {
-    user?: {
-        firstName: string;
-        lastName: string;
-        role: string;
-        imageUrl?: string | null;
-    } | null;
-}
 
 const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['USER', 'ADMIN'] },
@@ -131,7 +124,7 @@ export default function Navbar({ user }: NavbarProps) {
                                         )}
                                         onClick={() => setIsMobileMenuOpen(false)}
                                     >
-                                        <item.icon className="h-5 w-5 mr-3 flex-shrink-0" />
+                                        <item.icon className="h-5 w-5 mr-3 shrink-0" />
                                         <span>{item.name}</span>
                                     </Link>
                                 );

@@ -13,12 +13,8 @@ import {
     ComposedChart,
     Line,
 } from "recharts";
-import type { TopEvent } from "@/types/event";
 import { format } from "date-fns";
-
-interface EventChartProps {
-    events: TopEvent[];
-}
+import { EventChartProps } from "@/types";
 
 const COLORS = [
     "hsl(var(--chart-1))",
@@ -28,6 +24,23 @@ const COLORS = [
     "hsl(var(--chart-5))",
 ];
 
+type ChartDataItem = {
+    name: string;
+    registrations: number;
+    date: string;
+    trend: number;
+};
+
+type TooltipPayload = {
+    payload: ChartDataItem;
+    value: number;
+};
+
+type CustomTooltipProps = {
+    active?: boolean;
+    payload?: TooltipPayload[];
+};
+
 export const EventChart = ({ events }: EventChartProps) => {
     const chartData = events.map((event, index) => ({
         name: event.title,
@@ -36,7 +49,7 @@ export const EventChart = ({ events }: EventChartProps) => {
         trend: index > 0 ? events[index - 1]._count.registrations : event._count.registrations,
     }));
 
-    const CustomTooltip = ({ active, payload }: any) => {
+    const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
         if (active && payload && payload.length) {
             return (
                 <div className="rounded-lg border border-border bg-card p-4 shadow-lg">

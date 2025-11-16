@@ -1,12 +1,7 @@
 import { EventsHero } from "@/components/event/event-hero"
 import { UpcomingEventsList } from "@/components/event/upcoaming-events-list"
-import { getCurrentUser } from "@/lib/auth"
 export default async function EventsGridPage() {
-    const user = await getCurrentUser()
 
-    if (!user) {
-        return null
-    }
     return (
         <main className="mx-auto max-w-7xl  pt-0 my-auto  h-dvh">
             <EventsHero />

@@ -1,4 +1,3 @@
-import { requireAdmin } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { Card } from "@/components/ui/card";
@@ -9,13 +8,12 @@ import Link from "next/link";
 
 export default async function AdminAnalyticsPage() {
     try {
-        const user = await requireAdmin();
         const [
             totalEvents,
             totalUsers,
             totalRegistrations,
             totalFeedback,
-            recentEvents,
+            ,
             topEvents
         ] = await Promise.all([
             prisma.event.count(),

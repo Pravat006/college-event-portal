@@ -15,13 +15,9 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
+import { UnregisterEventButtonProps } from '@/types'
 
-interface UnregisterEventButtonProps {
-    eventId: string
-    eventTitle: string
-    onCancel: (eventId: string) => void
-    disabled?: boolean
-}
+
 
 export function UnregisterEventButton({
     eventId,

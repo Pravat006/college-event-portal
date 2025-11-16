@@ -41,15 +41,10 @@ export function useEventSocket(eventId: string) {
             console.log('User authenticated')
         })
 
-
-
         socketInstance.on('event-update', (update: EventUpdate) => {
             setUpdates(prev => [...prev, update])
             toast.success(`New update: ${update.message}`)
         })
-
-
-
 
         socketInstance.on('error', ({ message }: { message: string }) => {
             toast.error(message)
@@ -66,8 +61,7 @@ export function useEventSocket(eventId: string) {
             socketInstance.emit('leave-event', eventId)
             socketInstance.disconnect()
         }
-    }, [eventId, user?.id])
-
+    }, [eventId, user])
     const sendUpdate = useCallback((message: string) => {
         if (socket && user?.id) {
             socket.emit('send-event-update', {

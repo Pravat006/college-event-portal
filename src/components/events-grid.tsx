@@ -3,38 +3,19 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Calendar, MapPin, Users, Star } from 'lucide-react'
+import { Calendar, MapPin, Users, Star, ExternalLink } from 'lucide-react'
 import { format } from 'date-fns'
 import { useState } from 'react'
 import Image from 'next/image'
 import EventRegistrationForm from './event-registration-form'
-
-interface Event {
-    id: string
-    title: string
-    description: string
-    imageUrl: string | null
-    location: string
-    startDate: Date
-    endDate: Date
-    capacity: number
-    price: number | null
-    category: string
-    status: string
-    createdBy: { firstName: string; lastName: string }
-    registrations: Array<{ user: { id: string } }>
-    _count: { registrations: number; feedback: number }
-}
-
-interface EventsGridProps {
-    events: Event[]
-    user: { id: string; role: string }
-}
+import { EventsGridProps } from '@/types'
+import { EventWithRelations } from '@/lib/schemas'
+import Link from 'next/link'
 
 export default function EventsGrid({ events, user }: EventsGridProps) {
-    const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
+    const [selectedEvent, setSelectedEvent] = useState<EventWithRelations | null>(null)
 
-    const handleRegisterClick = (event: Event) => {
+    const handleRegisterClick = (event: EventWithRelations) => {
         setSelectedEvent(event)
     }
 
@@ -43,8 +24,9 @@ export default function EventsGrid({ events, user }: EventsGridProps) {
         window.location.reload()
     }
 
-    const isUserRegistered = (event: Event) => {
-        return event.registrations.some(reg => reg.user.id === user.id)
+    const isUserRegistered = (event: EventWithRelations) => {
+        if (!user) return false
+        return event.registrations?.some((reg) => reg.user?.id === user.id) || false
     }
 
     const getCategoryColor = (category: string) => {
@@ -65,19 +47,19 @@ export default function EventsGrid({ events, user }: EventsGridProps) {
                 <Calendar className="mx-auto h-12 w-12 text-gray-400" />
                 <h3 className="mt-2 text-sm font-medium text-gray-900">No events</h3>
                 <p className="mt-1 text-sm text-gray-500">
-                    {user.role === 'ADMIN' ? 'Create your first event to get started.' : 'No events available at the moment.'}
+                    {user?.role === 'ADMIN' ? 'Create your first event to get started.' : 'No events available at the moment.'}
                 </p>
             </div>
         )
     }
 
     return (
-        <>
-            <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                {events.map((event) => (
-                    <Card key={event.id} className="hover:shadow-lg transition-shadow pt-0">
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+            {events.map((event) => (
+                <div key={event.id} className="relative group overflow-hidden rounded-lg">
+                    <Card className="group-hover:opacity-40 transition-opacity duration-300 ease-in-out">
                         {event.imageUrl && (
-                            <div className="aspect-video bg-gray-100 rounded-t-lg overflow-hidden">
+                            <div className="aspect-video bg-gray-100 overflow-hidden">
                                 <Image
                                     src={event.imageUrl}
                                     alt={event.title}
@@ -112,12 +94,12 @@ export default function EventsGrid({ events, user }: EventsGridProps) {
                                 </div>
                                 <div className="flex items-center text-gray-600">
                                     <Users className="h-4 w-4 mr-2" />
-                                    {event._count.registrations} / {event.capacity} registered
+                                    {event._count?.registrations || 0} / {event.capacity} registered
                                 </div>
-                                {event._count.feedback > 0 && (
+                                {(event._count?.feedback || 0) > 0 && (
                                     <div className="flex items-center text-gray-600">
                                         <Star className="h-4 w-4 mr-2" />
-                                        {event._count.feedback} reviews
+                                        {event._count?.feedback || 0} reviews
                                     </div>
                                 )}
                             </div>
@@ -133,12 +115,12 @@ export default function EventsGrid({ events, user }: EventsGridProps) {
                                     by {event.createdBy.firstName} {event.createdBy.lastName}
                                 </span>
 
-                                {user.role !== 'ADMIN' && (
+                                {user?.role !== 'ADMIN' && (
                                     <Button
                                         size="sm"
                                         disabled={
                                             isUserRegistered(event) ||
-                                            event._count.registrations >= event.capacity ||
+                                            (event._count?.registrations || 0) >= event.capacity ||
                                             event.status === 'CANCELLED'
                                         }
                                         onClick={() => handleRegisterClick(event)}
@@ -147,7 +129,7 @@ export default function EventsGrid({ events, user }: EventsGridProps) {
                                             ? 'Cancelled'
                                             : isUserRegistered(event)
                                                 ? 'Registered'
-                                                : event._count.registrations >= event.capacity
+                                                : (event._count?.registrations || 0) >= event.capacity
                                                     ? 'Full'
                                                     : 'Register'
                                         }
@@ -162,8 +144,27 @@ export default function EventsGrid({ events, user }: EventsGridProps) {
                             )}
                         </CardContent>
                     </Card>
-                ))}
-            </div>
+
+                    {/* Hover Overlay */}
+                    <div className="absolute inset-0 flex items-center justify-center bg-blend-darken opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out">
+                        {user?.role === 'ADMIN' ? (
+                            <Link href={`/admin/events/${event.id}/manage`}>
+                                <Button className='rounded-none px-4  text-2xl font-bold' variant="link" >
+                                    <ExternalLink className="mr-2 " size={40} />
+                                    Manage Event
+                                </Button>
+                            </Link>
+                        ) : (
+                            <Link href={`/browse-events/event/${event.id}`} >
+                                <Button className='rounded-none px-4' variant="link">
+                                    <ExternalLink className="mr-2 h-4 w-4" />
+                                    View Details
+                                </Button>
+                            </Link>
+                        )}
+                    </div>
+                </div>
+            ))}
 
             {selectedEvent && (
                 <EventRegistrationForm
@@ -172,6 +173,6 @@ export default function EventsGrid({ events, user }: EventsGridProps) {
                     onSuccess={handleRegistrationSuccess}
                 />
             )}
-        </>
+        </div>
     )
 }

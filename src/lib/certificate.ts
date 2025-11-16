@@ -1,11 +1,21 @@
-import { CertificateData, WinnerPosition } from '@/types/event'
+import { WinnerPosition } from "./schemas"
+
+type CertificateData = {
+  userName: string
+  eventTitle: string
+  position: WinnerPosition
+  eventDate: string
+  organizerName: string
+  collegeName?: string
+  registrationNumber?: string
+  semester?: string
+}
 
 export function getPositionDisplay(position: WinnerPosition): string {
   const positions = {
     'FIRST': '1st Place',
     'SECOND': '2nd Place',
-    'THIRD': '3rd Place',
-    'PARTICIPATION': 'Participation'
+    'THIRD': '3rd Place'
   }
   return positions[position]
 }
@@ -14,8 +24,7 @@ export function getPositionEmoji(position: WinnerPosition): string {
   const emojis = {
     'FIRST': '🥇',
     'SECOND': '🥈',
-    'THIRD': '🥉',
-    'PARTICIPATION': '🎖️'
+    'THIRD': '🥉'
   }
   return emojis[position]
 }
@@ -23,13 +32,8 @@ export function getPositionEmoji(position: WinnerPosition): string {
 export function generateCertificateHTML(data: CertificateData): string {
   const { userName, eventTitle, position, eventDate, organizerName, collegeName, registrationNumber, semester } = data
 
-  const isParticipation = position === 'PARTICIPATION'
   const positionDisplay = getPositionDisplay(position)
   const positionEmoji = getPositionEmoji(position)
-  const certificateType = isParticipation ? 'Certificate of Participation' : 'Certificate of Achievement'
-  const achievementText = isParticipation
-    ? `for participating in`
-    : `for securing <strong>${positionDisplay}</strong> in`
 
   return `
     <!DOCTYPE html>
@@ -37,7 +41,7 @@ export function generateCertificateHTML(data: CertificateData): string {
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>${certificateType}</title>
+      <title>Certificate of Achievement</title>
       <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap');
         
@@ -226,11 +230,6 @@ export function generateCertificateHTML(data: CertificateData): string {
           box-shadow: 0 4px 8px rgba(255, 215, 0, 0.3);
         }
         
-        .participation-badge {
-          background: linear-gradient(45deg, #48bb78, #68d391);
-          color: white;
-        }
-        
         @media print {
           body {
             background: white;
@@ -248,10 +247,10 @@ export function generateCertificateHTML(data: CertificateData): string {
       <div class="certificate">
         <div class="certificate-border"></div>
         
-        ${!isParticipation ? `<div class="winner-badge">${positionEmoji} ${positionDisplay}</div>` : `<div class="winner-badge participation-badge">${positionEmoji} Participant</div>`}
+        <div class="winner-badge">${positionEmoji} ${positionDisplay}</div>
         
         <div class="certificate-header">
-          <h1 class="certificate-title">${certificateType}</h1>
+          <h1 class="certificate-title">Certificate of Achievement</h1>
           <p class="certificate-subtitle">Excellence in Achievement</p>
         </div>
         
@@ -260,7 +259,7 @@ export function generateCertificateHTML(data: CertificateData): string {
           
           <h2 class="recipient-name">${userName}</h2>
           
-          <p class="achievement-text">has been recognized ${achievementText}</p>
+          <p class="achievement-text">has been recognized for securing <strong>${positionDisplay}</strong> in</p>
           
           <h3 class="event-name">${eventTitle}</h3>
           

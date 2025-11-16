@@ -1,12 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { DashboardStatsProps } from '@/types'
 import { Calendar, Users, Star, TrendingUp } from 'lucide-react'
 
-interface DashboardStatsProps {
-    totalEvents: number
-    totalRegistrations: number
-    feedbackCount: number
-    userRole: string
-}
+
 
 export default function DashboardStats({
     totalEvents,

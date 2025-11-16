@@ -1,13 +1,13 @@
 import generateCertificateEmailHTML from "@/components/emails/send-certificate"
 import eventEmailHTML from "@/components/emails/send-event-confirmation"
 import generateEventUpdateHTML from "@/components/emails/send-event-update"
-import { EventEmail } from "@/types/event"
 import { Resend } from "resend"
+import { EventEmailData } from "./schemas"
 
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
-export async function sendEventConfirmationEmail({ event, user }: EventEmail) {
+export async function sendEventConfirmationEmail({ event, user }: EventEmailData) {
     // Generate email HTML content
     const htmlContent = eventEmailHTML({ event, user })
 
@@ -33,7 +33,7 @@ export async function sendEventConfirmationEmail({ event, user }: EventEmail) {
     }
 }
 
-export async function sendEventUpdateEmail({ event, user, updateType }: EventEmail & { updateType: 'updated' | 'cancelled' }) {
+export async function sendEventUpdateEmail({ event, user, updateType }: EventEmailData & { updateType: 'updated' | 'cancelled' }) {
     // Generate the HTML content
     const htmlContent = generateEventUpdateHTML({ event, user, updateType })
 

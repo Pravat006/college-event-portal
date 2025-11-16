@@ -7,28 +7,10 @@ import { toast } from 'sonner'
 import Image from 'next/image'
 import Link from 'next/link'
 import { UnregisterEventButton } from '@/components/unregister-event-button'
-
-interface Registration {
-    id: string
-    status: string
-    registeredAt: string
-    registrationNumber: string
-    fullName: string
-    semester: number
-    event: {
-        id: string
-        title: string
-        description?: string
-        imageUrl?: string
-        startDate: string
-        endDate: string
-        location: string
-        status: string
-    }
-}
+import { EventRegistrationPageItem } from '@/types'
 
 export default function RegistrationsPage() {
-    const [registrations, setRegistrations] = useState<Registration[]>([])
+    const [registrations, setRegistrations] = useState<EventRegistrationPageItem[]>([])
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
@@ -69,15 +51,12 @@ export default function RegistrationsPage() {
         }
     }
 
-    // UI state updater (API call handled inside UnregisterEventButton)
     const handleCancelRegistration = (eventId: string) => {
+        // Remove the registration from the UI immediately
         setRegistrations(prev =>
-            prev.map(reg =>
-                reg.event.id === eventId
-                    ? { ...reg, status: 'CANCELLED' }
-                    : reg
-            )
+            prev.filter(reg => reg.event.id !== eventId)
         )
+        toast.success('Registration cancelled successfully')
     }
 
     const formatDate = (dateString: string) => {
@@ -133,7 +112,7 @@ export default function RegistrationsPage() {
                         No registrations found
                     </h3>
                     <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
-                        You haven't registered for any events yet. Explore our upcoming events and register to participate.
+                        You haven&apos;t registered for any events yet. Explore our upcoming events and register to participate.
                     </p>
                     <Link href="/browse-events">
                         <Button className="inline-flex items-center gap-2">
@@ -150,7 +129,7 @@ export default function RegistrationsPage() {
     const pastRegistrations = registrations.filter(r => r.event.status === 'COMPLETED' || r.status === 'CANCELLED')
 
     return (
-        <div className="max-w-6xl mx-auto py-10 px-4 sm:px-6 md:px-8">
+        <div className="max-w-6xl mx-auto mt-16 py-10 px-4 sm:px-6 md:px-8">
             <div className="mb-12">
                 <h1 className="text-3xl font-medium mb-2">My Registrations</h1>
                 <p className="text-sm text-muted-foreground">
@@ -213,7 +192,7 @@ export default function RegistrationsPage() {
                                                 </p>
 
                                                 <p className="text-xs text-muted-foreground">
-                                                    Registration #{registration.registrationNumber} • Registered on {formatDate(registration.registeredAt).full}
+                                                    Registration #{registration.registrationNumber} • Registered on {full}
                                                 </p>
                                             </div>
 

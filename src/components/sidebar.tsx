@@ -8,7 +8,6 @@ import {
     Calendar,
     Users,
     Star,
-    Settings,
     BarChart3,
     LucideMessageCircle
 } from 'lucide-react'
@@ -20,25 +19,23 @@ interface SidebarProps {
 }
 
 const navigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['USER', 'ADMIN'] },
-    { name: 'Events', href: '/events', icon: Calendar, roles: ['USER', 'ADMIN'] },
-    { name: 'My Registrations', href: '/registrations', icon: Users, roles: ['USER'] },
+    { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard, roles: ['ADMIN'] },
+    { name: 'Events', href: '/admin/events', icon: Calendar, roles: ['ADMIN'] },
     { name: 'User Management', href: '/admin/users', icon: Users, roles: ['ADMIN'] },
     { name: 'Analytics', href: '/admin/analytics', icon: BarChart3, roles: ['ADMIN'] },
     { name: 'Send Updates', href: '/admin/send-updates', icon: LucideMessageCircle, roles: ['ADMIN'] },
     { name: 'Feedback', href: '/admin/feedback', icon: Star, roles: ['ADMIN'] },
-    { name: 'Settings', href: '/settings', icon: Settings, roles: ['USER', 'ADMIN'] },
 ]
 
 export default function Sidebar({ user }: SidebarProps) {
     const pathname = usePathname()
 
     const filteredNavigation = navigation.filter(item =>
-        item.roles.includes(user.role as 'USER' | 'ADMIN')
+        item.roles.includes(user.role as 'ADMIN')
     )
 
     return (
-        <div className="fixed left-0 top-16 h-[calc(100vh-4rem)] bg-background border    border-border overflow-y-auto z-40 w-64 hidden lg:block">
+        <div className="fixed left-0 top-16 h-[calc(100vh-4rem)] bg-background border border-border overflow-y-auto z-40 w-64 hidden lg:block">
             <nav className="p-4 space-y-2">
                 {filteredNavigation.map((item) => {
                     const isActive = pathname === item.href

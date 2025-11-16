@@ -1,38 +1,13 @@
 'use client'
 
-import { useState, memo } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import EventRegistrationForm from '@/components/event-registration-form'
 import toast from 'react-hot-toast'
 import { Loader2 } from 'lucide-react'
+import { EventRegistrationButtonProps } from '@/types'
 
-interface Event {
-    id: string
-    title: string
-    description: string
-    imageUrl: string | null
-    location: string
-    startDate: Date
-    endDate: Date
-    capacity: number
-    price: number | null
-    category: string
-    status: string
-    _count: { registrations: number }
-}
-
-interface User {
-    id: string
-    role: string
-}
-
-interface EventRegistrationButtonProps {
-    event: Event
-    user: User | null
-    isRegistered?: boolean
-    isFull: boolean
-}
 
 function EventRegistrationButton({
     event,
@@ -156,8 +131,4 @@ function EventRegistrationButton({
     )
 }
 
-// Create a memoized version of the component to prevent unnecessary re-renders
-const MemoizedEventRegistrationButton = memo(EventRegistrationButton);
-
-// Export the memoized version as default
-export default MemoizedEventRegistrationButton;
+export default EventRegistrationButton;

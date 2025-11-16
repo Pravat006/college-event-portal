@@ -1,8 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { GripHorizontal, RefreshCcw } from "lucide-react";
-import React, { useState } from "react";
+import React from "react";
 import { useTheme } from "@/hooks/use-theme";
 import { cn } from "@/lib/utils";
 

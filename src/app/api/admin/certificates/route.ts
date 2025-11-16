@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { generateCertificateHTML, getCertificateFileName } from '@/lib/certificate'
 import { format } from 'date-fns'
 import { requireAdmin } from '@/lib/auth'
+import { CertificateData } from '@/lib/schemas'
 
 // Get certificates for an event
 export async function GET(req: NextRequest) {
@@ -112,17 +113,39 @@ export async function POST(req: NextRequest) {
         }
 
         // Use stored certificate data or generate new
-        let certificateData = certificate.certificateData as any
+        let certificateData = certificate.certificateData as CertificateData | null
 
         if (!certificateData) {
             // Fallback: generate from winner data
+            // Fetch registration data for complete certificate info
+            const registration = await prisma.registration.findUnique({
+                where: {
+                    userId_eventId: {
+                        userId: certificate.winner.userId,
+                        eventId: certificate.winner.eventId
+                    }
+                }
+            })
+
             certificateData = {
                 userName: `${certificate.winner.user.firstName} ${certificate.winner.user.lastName}`,
                 eventTitle: certificate.winner.event.title,
                 position: certificate.winner.position,
                 eventDate: format(new Date(certificate.winner.event.startDate), 'MMMM do, yyyy'),
                 organizerName: `${certificate.winner.event.createdBy.firstName} ${certificate.winner.event.createdBy.lastName}`,
-                collegeName: "KONARK INSTITUTE OF SCIENCE AND TECHNOLOGY"
+                collegeName: "KONARK INSTITUTE OF SCIENCE AND TECHNOLOGY",
+                ...(registration && {
+                    registrationNumber: registration.registrationNumber.toString(),
+                    semester: registration.semester?.toString()
+                })
+            }
+        } else {
+            const rawData = certificateData as unknown as Record<string, unknown>
+            if (rawData.semester !== undefined && typeof rawData.semester === 'number') {
+                certificateData = {
+                    ...certificateData,
+                    semester: rawData.semester.toString()
+                }
             }
         }
 

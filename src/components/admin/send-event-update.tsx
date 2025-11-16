@@ -13,6 +13,7 @@ import { Send, Users, AlertCircle } from 'lucide-react'
 import { useEventSocket } from '@/hooks/use-socket'
 import { useUser } from '@clerk/nextjs'
 import toast from 'react-hot-toast'
+import { SendEventUpdateProps } from '@/types'
 
 const updateSchema = z.object({
     content: z.string()
@@ -22,16 +23,6 @@ const updateSchema = z.object({
 
 type UpdateFormData = z.infer<typeof updateSchema>
 
-interface Event {
-    id: string
-    title: string
-    status: string
-    _count: { registrations: number }
-}
-
-interface SendEventUpdateProps {
-    event: Event
-}
 
 export function SendEventUpdate({ event }: SendEventUpdateProps) {
     const { user } = useUser()

@@ -80,7 +80,7 @@ export default async function HomePage() {
           {/* Timeline */}
           <div className="relative">
             {/* Vertical line */}
-            <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-gradient-to-b from-[#87e64b]/20 via-[#87e64b]/50 to-[#87e64b]/20 hidden md:block" />
+            <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-linear-to-b from-[#87e64b]/20 via-[#87e64b]/50 to-[#87e64b]/20 hidden md:block" />
 
             <div className="space-y-16 md:space-y-24">
               {/* Step 1 */}
@@ -94,14 +94,14 @@ export default async function HomePage() {
                     Browse through a diverse range of cultural, technical, and sports events tailored to your interests.
                   </p>
                 </div>
-                <div className="absolute left-1/2 transform -translate-x-1/2 w-16 h-16 rounded-full bg-[#87e64b] flex items-center justify-center text-white font-bold text-xl shadow-lg hidden md:flex group-hover:scale-110 transition-transform">
+                <div className="absolute left-1/2 transform -translate-x-1/2 w-16 h-16 rounded-full bg-[#87e64b]  items-center justify-center text-white font-bold text-xl shadow-lg hidden md:flex group-hover:scale-110 transition-transform">
                   1
                 </div>
                 <div className="md:w-1/2 md:pl-12 animate-fade-in-right">
-                  <div className="bg-gradient-to-br from-[#87e64b]/10 to-transparent p-6 rounded-2xl border border-[#87e64b]/20">
+                  <div className="bg-linear-to-br from-[#87e64b]/10 to-transparent p-6 rounded-2xl border border-[#87e64b]/20">
                     <Calendar className="w-12 h-12 text-[#87e64b] mb-4" />
                     <p className="text-sm text-muted-foreground">
-                      Smart filters help you find exactly what you're looking for
+                      Smart filters help you find exactly what you&apos;re looking for
                     </p>
                   </div>
                 </div>
@@ -118,11 +118,11 @@ export default async function HomePage() {
                     Quick and seamless registration process with instant email confirmation.
                   </p>
                 </div>
-                <div className="absolute left-1/2 transform -translate-x-1/2 w-16 h-16 rounded-full bg-[#87e64b] flex items-center justify-center text-white font-bold text-xl shadow-lg hidden md:flex group-hover:scale-110 transition-transform">
+                <div className="absolute left-1/2 transform -translate-x-1/2 w-16 h-16 rounded-full bg-[#87e64b]  items-center justify-center text-white font-bold text-xl shadow-lg hidden md:flex group-hover:scale-110 transition-transform">
                   2
                 </div>
                 <div className="md:w-1/2 md:pr-12 animate-fade-in-left">
-                  <div className="bg-gradient-to-bl from-[#87e64b]/10 to-transparent p-6 rounded-2xl border border-[#87e64b]/20">
+                  <div className="bg-linear-to-bl from-[#87e64b]/10 to-transparent p-6 rounded-2xl border border-[#87e64b]/20">
                     <Users className="w-12 h-12 text-[#87e64b] mb-4" />
                     <p className="text-sm text-muted-foreground">
                       Secure your spot in seconds with our streamlined process
@@ -142,11 +142,11 @@ export default async function HomePage() {
                     Get real-time notifications and updates about your registered events.
                   </p>
                 </div>
-                <div className="absolute left-1/2 transform -translate-x-1/2 w-16 h-16 rounded-full bg-[#87e64b] flex items-center justify-center text-white font-bold text-xl shadow-lg hidden md:flex group-hover:scale-110 transition-transform">
+                <div className="absolute left-1/2 transform -translate-x-1/2 w-16 h-16 rounded-full bg-[#87e64b]  items-center justify-center text-white font-bold text-xl shadow-lg hidden md:flex group-hover:scale-110 transition-transform">
                   3
                 </div>
                 <div className="md:w-1/2 md:pl-12 animate-fade-in-right">
-                  <div className="bg-gradient-to-br from-[#87e64b]/10 to-transparent p-6 rounded-2xl border border-[#87e64b]/20">
+                  <div className="bg-linear-to-br from-[#87e64b]/10 to-transparent p-6 rounded-2xl border border-[#87e64b]/20">
                     <Bell className="w-12 h-12 text-[#87e64b] mb-4" />
                     <p className="text-sm text-muted-foreground">
                       Never miss important updates or schedule changes
@@ -166,11 +166,11 @@ export default async function HomePage() {
                     Participate, win, and share your experiences with the community.
                   </p>
                 </div>
-                <div className="absolute left-1/2 transform -translate-x-1/2 w-16 h-16 rounded-full bg-[#87e64b] flex items-center justify-center text-white font-bold text-xl shadow-lg hidden md:flex group-hover:scale-110 transition-transform">
+                <div className="absolute left-1/2 transform -translate-x-1/2 w-16 h-16 rounded-full bg-[#87e64b] items-center justify-center text-white font-bold text-xl shadow-lg hidden md:flex group-hover:scale-110 transition-transform">
                   4
                 </div>
                 <div className="md:w-1/2 md:pr-12 animate-fade-in-left">
-                  <div className="bg-gradient-to-bl from-[#87e64b]/10 to-transparent p-6 rounded-2xl border border-[#87e64b]/20">
+                  <div className="bg-linear-to-bl from-[#87e64b]/10 to-transparent p-6 rounded-2xl border border-[#87e64b]/20">
                     <Star className="w-12 h-12 text-[#87e64b] mb-4" />
                     <p className="text-sm text-muted-foreground">
                       Leave feedback and help others make informed decisions
@@ -195,7 +195,7 @@ export default async function HomePage() {
               Upcoming <span className="text-[#87e64b]">Events</span>
             </h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Don't miss out on these exciting opportunities
+              Don&apos;t miss out on these exciting opportunities
             </p>
           </div>
 
@@ -203,7 +203,7 @@ export default async function HomePage() {
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 mb-8">
               {events.map((event) => (
                 <Card key={event.id} className="group hover:shadow-xl transition-all duration-300 overflow-hidden">
-                  <div className="relative h-48 bg-gradient-to-br from-[#87e64b]/20 to-[#87e64b]/5">
+                  <div className="relative h-48 bg-linear-to-br from-[#87e64b]/20 to-[#87e64b]/5">
                     {event.imageUrl && (
                       <Image
                         src={event.imageUrl}
@@ -378,7 +378,7 @@ export default async function HomePage() {
 
       {/* CTA */}
       {!user && (
-        <section className="py-20 px-4 bg-gradient-to-br from-[#87e64b] to-[#6bc93a] text-white">
+        <section className="py-20 px-4 bg-linear-to-br from-[#87e64b] to-[#6bc93a] text-white">
           <div className="max-w-3xl mx-auto text-center">
             <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6">
               Ready to Get Started?

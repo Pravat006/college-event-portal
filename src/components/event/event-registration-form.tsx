@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useUser } from '@clerk/nextjs'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -21,6 +22,7 @@ import {
     DialogClose,
     DialogTrigger,
 } from "@/components/ui/dialog"
+import { EventRegistrationFormProps } from '@/types'
 
 const registrationSchema = z.object({
     registrationNumber: z.string()
@@ -32,14 +34,6 @@ const registrationSchema = z.object({
 
 type RegistrationFormData = z.infer<typeof registrationSchema>
 
-interface EventRegistrationFormProps {
-    eventId: string;
-    onSuccess?: () => void;
-    status: string;
-    disable: boolean;
-    registrationStatus?: string;
-}
-
 export default function EventRegistrationForm({
     eventId,
     onSuccess,
@@ -50,6 +44,15 @@ export default function EventRegistrationForm({
     const [loading, setLoading] = useState(false)
     const [open, setOpen] = useState(false)
     const router = useRouter()
+    const { isSignedIn } = useUser()
+
+    // Redirect to sign-in if user tries to open dialog while unauthenticated
+    useEffect(() => {
+        if (open && !isSignedIn) {
+            setOpen(false)
+            router.push('/sign-in')
+        }
+    }, [open, isSignedIn, router])
 
     const { register, handleSubmit, setValue, formState: { errors } } = useForm<RegistrationFormData>({
         resolver: zodResolver(registrationSchema)

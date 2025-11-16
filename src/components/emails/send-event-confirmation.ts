@@ -1,6 +1,6 @@
-import { EventEmail } from "@/types/event";
+import { EventEmailData } from "@/lib/schemas";
 import { format } from "date-fns";
-const eventEmailHTML = ({ event, user }: EventEmail) => {
+const eventEmailHTML = ({ event, user }: EventEmailData) => {
   const startDate = format(new Date(event.startDate), "EEEE, MMMM do, yyyy");
   const startTime = format(new Date(event.startDate), "h:mm a");
   const endTime = format(new Date(event.endDate), "h:mm a");

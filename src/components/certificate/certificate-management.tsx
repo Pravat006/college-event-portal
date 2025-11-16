@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -9,26 +9,19 @@ import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Award, Download, Eye, Loader2, X } from 'lucide-react'
 import { format } from 'date-fns'
 import toast from 'react-hot-toast'
-import { Certificate, WinnerPosition } from '@/types'
+import { CertificateManagementProps } from '@/types'
+import { CertificateWithRelations, WinnerPosition } from '@/lib/schemas'
 
-interface CertificateManagementProps {
-    eventId: string
-    eventTitle: string
-}
 
 export default function CertificateManagement({ eventId, eventTitle }: CertificateManagementProps) {
-    const [certificates, setCertificates] = useState<Certificate[]>([])
+    const [certificates, setCertificates] = useState<CertificateWithRelations[]>([])
     const [loading, setLoading] = useState(true)
     const [previewCertificate, setPreviewCertificate] = useState<string | null>(null)
     const [previewLoading, setPreviewLoading] = useState(false)
     const [selectedCertificateId, setSelectedCertificateId] = useState<string | null>(null)
     const [dialogOpen, setDialogOpen] = useState(false)
 
-    useEffect(() => {
-        fetchCertificates()
-    }, [eventId])
-
-    const fetchCertificates = async () => {
+    const fetchCertificates = useCallback(async () => {
         try {
             const response = await fetch(`/api/admin/certificates?eventId=${eventId}`)
             if (response.ok) {
@@ -39,10 +32,15 @@ export default function CertificateManagement({ eventId, eventTitle }: Certifica
             }
         } catch (error) {
             toast.error('Something went wrong')
+            console.error('Error fetching certificates:', error)
         } finally {
             setLoading(false)
         }
-    }
+    }, [eventId])
+
+    useEffect(() => {
+        fetchCertificates()
+    }, [fetchCertificates])
 
     const handleOpenPreview = async (certificateId: string) => {
         setSelectedCertificateId(certificateId)
@@ -66,6 +64,7 @@ export default function CertificateManagement({ eventId, eventTitle }: Certifica
             }
         } catch (error) {
             toast.error('Something went wrong')
+            console.error('Error generating certificate preview:', error)
             setDialogOpen(false)
         } finally {
             setPreviewLoading(false)
@@ -100,6 +99,7 @@ export default function CertificateManagement({ eventId, eventTitle }: Certifica
             }
         } catch (error) {
             toast.error('Something went wrong')
+            console.error('Error downloading certificate:', error)
         }
     }
 
@@ -280,7 +280,7 @@ export default function CertificateManagement({ eventId, eventTitle }: Certifica
 
                             {/* Certificate Iframe */}
                             <div
-                                className="relative w-full h-full max-w-[1280px] max-h-[905px] bg-white shadow-2xl rounded-lg overflow-hidden"
+                                className="relative w-full h-full max-w-7xl max-h-[905px] bg-white shadow-2xl rounded-lg overflow-hidden"
                                 style={{
                                     aspectRatio: '1.414 / 1', // A4 ratio
                                 }}

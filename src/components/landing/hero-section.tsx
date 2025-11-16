@@ -3,7 +3,6 @@
 import { ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import AnimatedBgGlow from "./animated-bg"
 
 export default function HeroSection() {
     return (

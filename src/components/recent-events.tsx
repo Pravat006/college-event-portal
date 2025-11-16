@@ -2,19 +2,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Calendar, MapPin, Users } from 'lucide-react'
 import { format } from 'date-fns'
+import { RecentEventsProps } from '@/types'
 
-interface Event {
-    id: string
-    title: string
-    location: string
-    startDate: Date
-    category: string
-    _count: { registrations: number }
-}
-
-interface RecentEventsProps {
-    events: Event[]
-}
 
 export default function RecentEvents({ events }: RecentEventsProps) {
     const getCategoryColor = (category: string) => {
@@ -58,7 +47,7 @@ export default function RecentEvents({ events }: RecentEventsProps) {
                                 </div>
                                 <div className="flex items-center">
                                     <Users className="h-4 w-4 mr-2" />
-                                    {event._count.registrations} registered
+                                    {event._count?.registrations || 0} registered
                                 </div>
                             </div>
                         </div>

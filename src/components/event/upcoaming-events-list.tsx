@@ -5,15 +5,18 @@ import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/auth';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-interface Event {
-    id: string;
-    title: string;
-    location: string;
-    startDate: Date;
-    endDate: Date;
-    description: string;
-    imageUrl: string | null;
-    status: string;
+type EventWithDetails = Awaited<ReturnType<typeof getEvents>>[number];
+
+async function getEvents(userRole?: string) {
+    return await prisma.event.findMany({
+        where: userRole === 'ADMIN' ? {} : { status: { in: ['PUBLISHED', 'COMPLETED'] } },
+        include: {
+            createdBy: { select: { id: true, email: true, firstName: true, lastName: true } },
+            registrations: { include: { user: { select: { id: true } } } },
+            _count: { select: { registrations: true, feedback: true, winners: true, updates: true } }
+        },
+        orderBy: { startDate: 'desc' }
+    });
 }
 
 const formatDate = (date: Date) => {
@@ -33,7 +36,7 @@ const truncateDescription = (text: string, maxLength: number = 150) => {
     return text.substring(0, maxLength) + '...';
 };
 
-function EventCard({ event }: { event: Event }) {
+function EventCard({ event }: { event: EventWithDetails }) {
     const { month, day } = formatDate(event.startDate);
     const time = formatTime(event.startDate, event.endDate);
 
@@ -61,7 +64,6 @@ function EventCard({ event }: { event: Event }) {
                 </div>
             </div>
 
-            {/* Details Column */}
             <div className="flex-1">
                 <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-2">
                     {event.title}
@@ -90,22 +92,9 @@ function EventCard({ event }: { event: Event }) {
 export async function UpcomingEventsList() {
     const user = await getCurrentUser();
 
-    if (!user) {
-        return null;
-    }
+    // Fetch events for both authenticated and unauthenticated users
+    const allEvents = await getEvents(user?.role);
 
-    // Fetch all events
-    const allEvents = await prisma.event.findMany({
-        where: user.role === 'ADMIN' ? {} : { status: { in: ['PUBLISHED', 'COMPLETED'] } },
-        include: {
-            createdBy: { select: { firstName: true, lastName: true } },
-            registrations: { include: { user: { select: { id: true } } } },
-            _count: { select: { registrations: true, feedback: true } }
-        },
-        orderBy: { startDate: 'desc' }
-    });
-
-    // Separate events by status
     const upcomingEvents = allEvents.filter(e => e.status === 'PUBLISHED');
     const completedEvents = allEvents.filter(e => e.status === 'COMPLETED');
 

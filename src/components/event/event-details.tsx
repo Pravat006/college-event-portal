@@ -17,7 +17,7 @@ export async function EventDetails({ id }: { id: string }) {
         },
     })
 
-    if (!event || !user) return null
+    if (!event) return null
 
     const {
         title,
@@ -48,13 +48,13 @@ export async function EventDetails({ id }: { id: string }) {
         minute: "2-digit",
     })}`
 
-    const userRegistration = registrations.find(reg => reg.user.id === user.id)
+    const userRegistration = user ? registrations.find(reg => reg.user.id === user.id) : null
     const userRegistrationStatus = userRegistration?.status // "REGISTERED" | "ATTENDED" | "CANCELLED" | undefined
 
-    const isUserRegistered = userRegistrationStatus === "REGISTERED"
+    // const isUserRegistered = userRegistrationStatus === "REGISTERED"
 
     return (
-        <section className="max-w-6xl mx-auto py-10">
+        <section className="max-w-6xl mx-auto py-6">
             {/* single thin separator */}
             <div className="border-b border-gray-200 pb-10">
                 <div className="flex flex-col gap-6 md:grid md:grid-cols-[90px_minmax(0,260px)_minmax(0,1fr)] md:gap-8">
@@ -118,7 +118,8 @@ export async function EventDetails({ id }: { id: string }) {
                                 </div>
                             </div>
 
-                            {user.role !== "ADMIN" && (
+                            {/* Show registration form for all non-admin users (authenticated or not) */}
+                            {(!user || user?.role !== "ADMIN") && (
                                 <div className="sm:min-w-[220px]">
                                     <EventRegistrationForm
                                         eventId={id}

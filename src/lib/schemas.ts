@@ -14,7 +14,7 @@ export const NotificationTypeEnum = z.enum([
     'FEEDBACK_REQUEST',
     'REGISTRATION_CANCELLED'
 ])
-export const WinnerPositionEnum = z.enum(['FIRST', 'SECOND', 'THIRD', 'PARTICIPATION'])
+export const WinnerPositionEnum = z.enum(['FIRST', 'SECOND', 'THIRD'])
 
 
 export const UserSchema = z.object({
@@ -274,7 +274,7 @@ export const CertificateSchema = z.object({
     id: z.string().cuid(),
     winnerId: z.string().cuid(),
     certificateUrl: z.string().url().optional().nullable(),
-    certificateData: z.record(z.string(), z.any()).optional().nullable(),
+    certificateData: z.record(z.string(), z.unknown()).optional().nullable(),
     issuedAt: z.date(),
     emailSent: z.boolean(),
     emailSentAt: z.date().optional().nullable(),
@@ -290,7 +290,7 @@ export const CertificateDataSchema = z.object({
     organizerName: z.string().min(1),
     collegeName: z.string().optional(),
     registrationNumber: z.string().optional(),
-    semester: z.number().int().optional(),
+    semester: z.string().optional(),
 })
 
 export const GenerateCertificateSchema = z.object({
@@ -505,7 +505,7 @@ export type Search = z.infer<typeof SearchSchema>
 // API RESPONSE TYPES
 // ============================================================================
 
-export type ApiResponse<T = any> = {
+export type ApiResponse<T = unknown> = {
     success: boolean
     data?: T
     message?: string

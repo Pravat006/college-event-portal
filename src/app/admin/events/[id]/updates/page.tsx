@@ -1,123 +1,150 @@
-import { auth } from '@clerk/nextjs/server'
-import { redirect } from 'next/navigation'
-import { prisma } from '@/lib/prisma'
-import { SendEventUpdate } from '@/components/admin/send-event-update'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Calendar, MapPin, Users } from 'lucide-react'
-import { format } from 'date-fns'
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { ArrowLeft } from 'lucide-react'
-import { requireAdmin } from '@/lib/auth'
+import { requireAdmin } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { prisma } from "@/lib/prisma";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ArrowLeft, Calendar, MapPin, Users, Trophy, Award } from "lucide-react";
+import Link from "next/link";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import WinnerDeclaration from "@/components/admin/winner-declaration";
+import CertificateManagement from "@/components/certificate/certificate-management";
 
-export default async function AdminEventDetailsPage({
-    params
-}: {
+interface PageProps {
     params: Promise<{ id: string }>
-}) {
-    const user = await requireAdmin()
-    if (!user) {
-        redirect('/sign-in')
-    }
+}
 
-    const { id } = await params
+export default async function EventManagementPage({ params }: PageProps) {
+    try {
+        await requireAdmin();
+        const { id } = await params;
 
-
-    // Get event details
-    const event = await prisma.event.findUnique({
-        where: { id },
-        include: {
-            createdBy: {
-                select: { firstName: true, lastName: true }
-            },
-            _count: {
-                select: {
-                    registrations: true,
-                    feedback: true,
-                    updates: true
+        const event = await prisma.event.findUnique({
+            where: { id },
+            include: {
+                _count: {
+                    select: {
+                        registrations: true,
+                        winners: true
+                    }
                 }
             }
-        }
-    })
+        });
 
-    if (!event) {
+        if (!event) {
+            redirect("/admin/events");
+        }
+
+        const getStatusBadge = (status: string) => {
+            const variants = {
+                PUBLISHED: 'default',
+                DRAFT: 'secondary',
+                CANCELLED: 'destructive',
+                COMPLETED: 'outline'
+            } as const;
+
+            return variants[status as keyof typeof variants] || 'default';
+        };
+
         return (
-            <div className="container mx-auto p-6">
+            <div className="container mx-auto py-6 space-y-6">
+                {/* Header */}
+                <div className="flex items-center gap-4">
+                    <Button variant="ghost" size="icon" asChild>
+                        <Link href="/admin/events">
+                            <ArrowLeft className="h-4 w-4" />
+                        </Link>
+                    </Button>
+                    <div className="flex-1">
+                        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Event Management</h1>
+                        <p className="text-muted-foreground mt-1">Manage winners and certificates</p>
+                    </div>
+                </div>
+
+                {/* Event Overview Card */}
                 <Card>
-                    <CardContent className="p-6 text-center">
-                        <p>Event not found</p>
+                    <CardHeader>
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                            <div className="flex-1">
+                                <CardTitle className="text-2xl">{event.title}</CardTitle>
+                                <CardDescription className="mt-2 line-clamp-2">
+                                    {event.description}
+                                </CardDescription>
+                            </div>
+                            <Badge variant={getStatusBadge(event.status)} className="text-sm">
+                                {event.status}
+                            </Badge>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+                                <Calendar className="h-5 w-5 text-muted-foreground" />
+                                <div>
+                                    <p className="text-sm text-muted-foreground">Date</p>
+                                    <p className="font-medium">
+                                        {new Date(event.startDate).toLocaleDateString('en-US', {
+                                            month: 'short',
+                                            day: 'numeric',
+                                            year: 'numeric'
+                                        })}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+                                <MapPin className="h-5 w-5 text-muted-foreground" />
+                                <div>
+                                    <p className="text-sm text-muted-foreground">Location</p>
+                                    <p className="font-medium truncate">{event.location}</p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+                                <Users className="h-5 w-5 text-muted-foreground" />
+                                <div>
+                                    <p className="text-sm text-muted-foreground">Registrations</p>
+                                    <p className="font-medium">
+                                        {event._count.registrations} / {event.capacity}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+                                <Trophy className="h-5 w-5 text-muted-foreground" />
+                                <div>
+                                    <p className="text-sm text-muted-foreground">Winners</p>
+                                    <p className="font-medium">{event._count.winners}</p>
+                                </div>
+                            </div>
+                        </div>
                     </CardContent>
                 </Card>
+
+                {/* Tabs for Winner Declaration and Certificate Management */}
+                <Tabs defaultValue="winners" className="space-y-6">
+                    <TabsList className="grid w-full max-w-md grid-cols-2">
+                        <TabsTrigger value="winners" className="flex items-center gap-2">
+                            <Trophy className="h-4 w-4" />
+                            Winner Declaration
+                        </TabsTrigger>
+                        <TabsTrigger value="certificates" className="flex items-center gap-2">
+                            <Award className="h-4 w-4" />
+                            Certificates
+                        </TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="winners" className="space-y-4">
+                        <WinnerDeclaration eventId={event.id} eventTitle={event.title} />
+                    </TabsContent>
+
+                    <TabsContent value="certificates" className="space-y-4">
+                        <CertificateManagement eventId={event.id} eventTitle={event.title} />
+                    </TabsContent>
+                </Tabs>
             </div>
-        )
+        );
+    } catch {
+        redirect("/admin/events");
     }
-
-    return (
-        <div className="container mx-auto p-6 space-y-6">
-            {/* Header */}
-            <div className="flex items-center gap-4">
-                <Link href="/admin/events">
-                    <Button variant="outline" size="icon">
-                        <ArrowLeft className="h-4 w-4" />
-                    </Button>
-                </Link>
-                <div>
-                    <h1 className="text-3xl font-bold">{event.title}</h1>
-                    <p className="text-muted-foreground">Manage event and send updates</p>
-                </div>
-            </div>
-
-            {/* Event Details Card */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Event Details</CardTitle>
-                    <CardDescription>Overview of event information</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <div className="flex items-center gap-2 text-sm">
-                                <Calendar className="h-4 w-4 text-muted-foreground" />
-                                <span className="font-medium">Start:</span>
-                                <span>{format(new Date(event.startDate), 'PPP p')}</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-sm">
-                                <MapPin className="h-4 w-4 text-muted-foreground" />
-                                <span className="font-medium">Location:</span>
-                                <span>{event.location}</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-sm">
-                                <Users className="h-4 w-4 text-muted-foreground" />
-                                <span className="font-medium">Registrations:</span>
-                                <span>{event._count.registrations} / {event.capacity}</span>
-                            </div>
-                        </div>
-                        <div className="space-y-2">
-                            <div className="flex items-center gap-2">
-                                <span className="text-sm font-medium">Status:</span>
-                                <Badge>{event.status}</Badge>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <span className="text-sm font-medium">Category:</span>
-                                <Badge variant="outline">{event.category}</Badge>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <span className="text-sm font-medium">Updates Sent:</span>
-                                <Badge variant="secondary">{event._count.updates}</Badge>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <p className="text-sm font-medium mb-1">Description:</p>
-                        <p className="text-sm text-muted-foreground">{event.description}</p>
-                    </div>
-                </CardContent>
-            </Card>
-
-            {/* Send Update Component */}
-            <SendEventUpdate event={event} />
-        </div>
-    )
 }

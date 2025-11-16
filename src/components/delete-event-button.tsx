@@ -2,11 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { DeleteEventButtonProps } from '@/types'
 
-interface DeleteEventButtonProps {
-    eventId: string
-    eventTitle: string
-}
 
 export default function DeleteEventButton({ eventId, eventTitle }: DeleteEventButtonProps) {
     const [isDeleting, setIsDeleting] = useState(false)
