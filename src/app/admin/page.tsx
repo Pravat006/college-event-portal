@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import Navbar from "@/components/navbar";
 import Sidebar from "@/components/sidebar";
+import Link from "next/link";
 
 export default async function AdminPage() {
     try {
@@ -25,27 +26,21 @@ export default async function AdminPage() {
                             <h1 className="text-2xl font-bold text-gray-900 mb-6">Admin Dashboard</h1>
 
                             <div className="mb-8">
-                                {/* <DashboardStats
-                                    totalEvents={totalEvents}
-                                    totalRegistrations={totalRegistrations}
-                                    feedbackCount={feedbackCount}
-                                    userRole="ADMIN"
-                                /> */}
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="bg-white p-6 rounded-lg shadow-sm">
                                     <h2 className="text-lg font-semibold mb-4">Admin Actions</h2>
                                     <div className="space-y-3">
-                                        <a href="/admin/events" className="block text-blue-600 hover:underline">
+                                        <Link href="/admin/events" className="block text-blue-600 hover:underline">
                                             Manage Events
-                                        </a>
-                                        <a href="/admin/users" className="block text-blue-600 hover:underline">
+                                        </Link>
+                                        <Link href="/admin/users" className="block text-blue-600 hover:underline">
                                             Manage Users
-                                        </a>
-                                        <a href="/admin/registrations" className="block text-blue-600 hover:underline">
+                                        </Link>
+                                        <Link href="/admin/registrations" className="block text-blue-600 hover:underline">
                                             Manage Registrations
-                                        </a>
+                                        </Link>
                                     </div>
                                 </div>
 
